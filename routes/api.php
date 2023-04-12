@@ -95,13 +95,13 @@ Route::prefix('staff')->group(function() {
 
 // setting
 Route::prefix('setting')->group(function() {
-    Route::get('/', [SettingController::class, 'index']);
-    Route::post('/', [SettingController::class, 'store']);
-    Route::put('/profile', [SettingController::class, 'profile']);
-    Route::get('/profile', [SettingController::class, 'get_profile']);
-    Route::get('/profile-user', [SettingController::class, 'profile_user']);
-    Route::patch('/reset-password', [SettingController::class, 'reset_password']);
-    Route::patch('/ubah-profile', [SettingController::class, 'ubah_profile']);
+    Route::get('/', [SettingController::class, 'index'])->middleware('auth:api');
+    Route::post('/', [SettingController::class, 'store'])->middleware('auth:api');
+    Route::put('/profile', [SettingController::class, 'profile'])->middleware('auth:api');
+    Route::get('/profile', [SettingController::class, 'get_profile'])->middleware('auth:api');
+    Route::get('/profile-user', [SettingController::class, 'profile_user'])->middleware('auth:api');
+    Route::patch('/reset-password', [SettingController::class, 'reset_password'])->middleware('auth:api');
+    Route::patch('/ubah-profile', [SettingController::class, 'ubah_profile'])->middleware('auth:api');
 });
 
 // dashboard
