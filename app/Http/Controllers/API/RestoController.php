@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Helper\ApiFormatter;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Exception;
 
 use App\Models\Resto;
@@ -95,6 +96,7 @@ class RestoController extends Controller
                 'kota' => $request->kota,
                 'provinsi' => $request->provinsi,
                 'status_resto' => 1,
+                'slug' => Str::slug($request->nama_resto),
             ]);
 
             $data = Resto::where('id', '=', $resto->id)->get();
@@ -126,6 +128,7 @@ class RestoController extends Controller
                 'nomor_telepon' => $request->nomor_telepon,
                 'kota' => $request->kota,
                 'provinsi' => $request->provinsi,
+                'slug' => Str::slug($request->nama_resto),
             ]);
 
             $data = Resto::where('id', '=', $id)->first();
