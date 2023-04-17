@@ -35,7 +35,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // resto
 Route::apiResource('/resto', RestoController::class)->except('show')->middleware('auth:api');
-Route::get('resto/setting-resto', [RestoController::class, 'setting_resto'])->middleware('auth:api');
+Route::get('resto/setting-resto', [RestoController::class, 'setting_resto']); // mengambil setting resto
 Route::prefix('resto')->group(function() {
     Route::get('/show', [RestoController::class, 'resto_row']);
     Route::get('/all', [RestoController::class, 'resto_all']);
@@ -51,6 +51,7 @@ Route::prefix('kategori-bisnis')->group(function() {
 
 // kategori-produk
 Route::apiResource('/kategori-produk', KategoriProdukController::class)->except('show')->middleware('auth:api');
+Route::get('kategori-produk/menu', [KategoriProdukController::class, 'kategori_produk_menu']);
 Route::get('kategori-produk/all', [KategoriProdukController::class, 'kategori_produk_all']);
 
 // level

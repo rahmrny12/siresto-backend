@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Exception;
 
 use App\Models\Produk;
+use App\Models\Resto;
 use App\Models\Meja;
 
 class ProdukController extends Controller
@@ -56,9 +57,9 @@ class ProdukController extends Controller
     {
         $query = Produk::query();
 
-        if($code = request()->code) {
-            $meja = Meja::where('uuid', $code)->first();
-            $query->where('id_resto', $meja->id_resto);
+        if($slug = request('resto')) {
+            $resto = Resto::where('slug', $slug)->first();
+            $query->where('id_resto', $resto->id);
         }
 
         if ($s = request()->input('s')) {

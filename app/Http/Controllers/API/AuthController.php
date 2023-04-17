@@ -6,12 +6,14 @@ use Illuminate\Http\Request;
 use App\Helper\ApiFormatter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
 use App\Models\User;
+use App\Models\Resto;
 
 class AuthController extends Controller
 {
@@ -28,27 +30,59 @@ class AuthController extends Controller
     public function register()
     {
         $validator = Validator::make(request()->all(), [
+            'email' => 'required',
             'name' => 'required',
-            'username' => 'required',
             'password' => 'required',
+            'businessName' => 'required',
+            'businessCategory' => 'required',
+            'phone' => 'required',
+            'province' => 'required',
+            'city' => 'required',
+            'product_id' => 'required',
         ]);
 
         if($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Ada Kesalahan',
-                'data' => $validator->errors()
+                'data' => $validator->errors(),
             ]);
         }
 
-        $input = request()->all();
-        $input['password_asli'] = $input['password'];
-        $input['password'] = bcrypt($input['password']);
-        $user = User::create($input);
+        $resto = [
+            'nama_pemilik' => request('name'),
+            'nama_resto' => request('businessName'),
+            'id_kategori_bisnis' => 0,
+            'nomor_telepon' => request('phone'),
+            'kota' => request('city'),
+            'provinsi' => request('provinsi'),
+            'email' => request('email'),
+            'kategori_bisnis' => request('businessCategory'),
+            'slug' => Str::slug(request('businessName')),
+            'status_resto' => 1,
+        ];
 
-        $success['token'] = $user->createToken('ewq98gegfNNn77j30u8PwL6sGFhj6aTXRcvrVFNq')->accessToken;
-        $success['username'] = $user->username;
-        $success['name'] = $user->name;
+        $add_resto = Resto::create($resto);
+        $id_resto = $add_resto->id;
+
+        $user = [
+            'name' => request('name'),
+            'email' => request('email'),
+            'password' => bcrypt(request('password')),
+            'password_asli' => request('password'),
+            'id_level' => 2,
+            'id_resto' => $id_resto,
+            'id_lisence' => 1,
+            'no_telepon' => request('phone'),
+            'alamat_lengkap' => '',
+            'product_id' => request('product_id'),
+        ];
+
+        $add_user = User::create($user);
+
+        $success['token'] = $add_user->createToken('ewq98gegfNNn77j30u8PwL6sGFhj6aTXRcvrVFNq')->accessToken;
+        $success['email'] = $add_user->email;
+        $success['name'] = $add_user->name;
 
         return ApiFormatter::createApi(200, '', [
             'success' => true,
@@ -65,12 +99,12 @@ class AuthController extends Controller
     public function login()
     {
         $credentials = request()->validate([
-            'username' => 'required',
+            'email' => 'required',
             'password' => 'required'
         ]);
 
         if (!auth()->attempt($credentials)) {
-            return ApiFormatter::createApi(400, 'Username Atau Password Salah', [
+            return ApiFormatter::createApi(400, 'Email Atau Password Salah', [
                 'success' => false,
                 'data' => null
             ]);

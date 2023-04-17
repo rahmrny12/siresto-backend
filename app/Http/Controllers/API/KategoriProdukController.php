@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Exception;
 
 use App\Models\KategoriProduk;
+use App\Models\Resto;
 
 class KategoriProdukController extends Controller
 {
@@ -32,6 +33,20 @@ class KategoriProdukController extends Controller
         $result = $query->paginate($perPage);
         $data = $result;
         
+        if($data) {
+            return ApiFormatter::createApi(200, 'Success', $data);
+        } else {
+            return ApiFormatter::createApi(400, 'Failed');
+        }
+    }
+
+    // api untuk kategori produk di halaman menu frontend
+    public function kategori_produk_menu()
+    {
+        $slug = request('resto');
+        $resto = Resto::where('slug', $slug)->first();
+        $data = KategoriProduk::where('id_resto', $resto->id)->orderByDesc('id')->get();
+
         if($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {

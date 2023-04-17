@@ -68,9 +68,9 @@ class RestoController extends Controller
 
     public function setting_resto(Request $request)
     {
-        $code = $request->code;
-        $meja = Meja::where('uuid', $code)->first();
-        $data = Setting::where('id_resto', $meja->id_resto)->first();
+        $slug = $request->resto;
+        $resto = Resto::where('slug', $slug)->first();
+        $data = Setting::where('id_resto', $resto->id)->first();
 
         if($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
