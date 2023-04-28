@@ -55,7 +55,7 @@ class AuthController extends Controller
             'id_kategori_bisnis' => 0,
             'nomor_telepon' => request('phone'),
             'kota' => request('city'),
-            'provinsi' => request('provinsi'),
+            'provinsi' => request('province'),
             'email' => request('email'),
             'kategori_bisnis' => request('businessCategory'),
             'slug' => Str::slug(request('businessName')),
