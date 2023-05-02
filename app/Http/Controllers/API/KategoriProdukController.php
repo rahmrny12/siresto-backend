@@ -151,8 +151,9 @@ class KategoriProdukController extends Controller
     public function kategori_produk_all(Request $request)
     {
         try{
+            $id_resto = $request->user()->id_resto;
             $s = $request->s;
-            $data = KategoriProduk::select('id as value', 'kategori_produk as label')->where('kategori_produk', 'ILIKE', "%$s%")->get();
+            $data = KategoriProduk::select('id as value', 'kategori_produk as label')->where('kategori_produk', 'ILIKE', "%$s%")->where('id_resto', $id_resto)->get();
 
             if($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
