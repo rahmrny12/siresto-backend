@@ -80,7 +80,8 @@ class OrderController extends Controller
 
     public function simpan_order_konsumen(Request $request)
     {
-        $meja = Meja::where('uuid', $request->code)->first();
+        $resto = Resto::where('slug', $request->branch)->firstOrFail();
+        $meja = Meja::where('no_meja', $request->meja)->where('id_resto', $resto->id)->first();
         $order = Order::create([
             'no_transaksi' => $this->no_transaksi(),
             'nilai_transaksi' => $request->subtotal,
@@ -88,7 +89,7 @@ class OrderController extends Controller
             'bayar' => 0,
             'kembali' => 0,
             'nama_customer' => $request->nama_pelanggan,
-            'id_resto' => $meja->id_resto,
+            'id_resto' => $resto->id,
             'id_meja' => $meja->id,
             'diskon' => $request->diskon,
             'metode_pembayaran' => '',

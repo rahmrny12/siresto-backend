@@ -150,17 +150,14 @@ class KategoriProdukController extends Controller
 
     public function kategori_produk_all(Request $request)
     {
-        try{
-            $s = $request->s;
-            $data = KategoriProduk::select('id as value', 'kategori_produk as label')->where('kategori_produk', 'ILIKE', "%$s%")->get();
+        $id_resto = auth()->user()->id_resto;
+        $s = $request->s;
+        $data = KategoriProduk::select('id as value', 'kategori_produk as label')->where('kategori_produk', 'ILIKE', "%$s%")->where('id_resto', $id_resto)->get();
 
-            if($data) {
-                return ApiFormatter::createApi(200, 'Success', $data);
-            } else {
-                return ApiFormatter::createApi(400, 'Failed');
-            }
-        } catch(Exception $error) {
-            return ApiFormatter::createApi(500, 'Failed');
+        if($data) {
+            return ApiFormatter::createApi(200, 'Success', $data);
+        } else {
+            return ApiFormatter::createApi(400, 'Failed');
         }
     }
 }

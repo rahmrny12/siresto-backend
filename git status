@@ -1,0 +1,13 @@
+[33m47755d7[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Edit route api
+[33md12f27c[m Menambahkan id user di kategoriProdukController
+[33m86d5099[m edit fungsi all KategoriProdukController
+[33mcdaa034[m Menambahkan id user di kategoriProdukController
+[33mf631908[m Ubah AuthController
+[33mcd4952a[m Mensinkronisasi fungsi register dan login siresto
+[33mc8b4565[m Menambahkan slug di resto
+[33mc2d6fd3[m menambahkan middleware auth api di route setting
+[33m9a9c6e0[m menambahkan folder images
+[33mf4ac855[m menghapus public folder
+[33md5281bb[m menambahkan folder images
+[33m05cf0e3[m tambah env
+[33mbb1305d[m first commit
