@@ -52,7 +52,7 @@ Route::prefix('kategori-bisnis')->group(function() {
 // kategori-produk
 Route::apiResource('/kategori-produk', KategoriProdukController::class)->except('show')->middleware('auth:api');
 Route::get('kategori-produk/menu', [KategoriProdukController::class, 'kategori_produk_menu']);
-Route::get('kategori-produk/all', [KategoriProdukController::class, 'kategori_produk_all']);
+Route::get('kategori-produk/all', [KategoriProdukController::class, 'kategori_produk_all'])->middleware('auth:api');
 
 // level
 Route::apiResource('level', LevelController::class)->except('show');
