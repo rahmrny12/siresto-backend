@@ -20,7 +20,9 @@ class KategoriProdukController extends Controller
     public function index()
     {
         $query = KategoriProduk::query();
+        $id_resto = auth()->user()->id_resto;
 
+        $query->where('id_resto', $id_resto);
         if ($s = request()->input('s')) {
             $query->where('kategori_produk', 'ILIKE', '%' . $s . '%');
         }
@@ -63,8 +65,12 @@ class KategoriProdukController extends Controller
     public function store(Request $request)
     {
         try{
+            $user = $request->user();
+            $id_resto = $user->id_resto;
+
             $kategori_produk = KategoriProduk::create([
                 'kategori_produk' => $request->kategori_produk,
+                'id_resto' => $id_resto,
             ]);
 
             $data = KategoriProduk::where('id', '=', $kategori_produk->id)->get();
@@ -106,8 +112,10 @@ class KategoriProdukController extends Controller
     public function update(Request $request, $id)
     {
         try{
+            $id_resto = $request->user()->id_resto;
             $kategori_produk = KategoriProduk::where('id', $id)->update([
                 'kategori_produk' => $request->kategori_produk,
+                'id_resto' => $id_resto,
             ]);
 
             $data = KategoriProduk::where('id', '=', $id)->get();
