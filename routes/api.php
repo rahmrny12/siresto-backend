@@ -17,6 +17,7 @@ use App\Http\Controllers\API\StaffController;
 use App\Http\Controllers\API\SettingController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\PembayaranController;
+use App\Http\Controllers\API\MenuController;
 
 /*
 |--------------------------------------------------------------------------
@@ -113,6 +114,7 @@ Route::prefix('dashboard')->group(function() {
 
 // frontend
 Route::post('pembayaran', [PembayaranController::class, 'store']);
+Route::get('menu/cek-pelanggan', [MenuController::class, 'cek_pelanggan']);
 
 // auth admin
 Route::group(['prefix' => 'auth'], function ($router) {
