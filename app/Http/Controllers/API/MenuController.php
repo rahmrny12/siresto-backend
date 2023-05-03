@@ -18,7 +18,7 @@ class MenuController extends Controller
     {
         $no_telepon = $request->telepon;
         $query_pelanggan = Pelanggan::where('no_telepon', $no_telepon);
-        if($jumlah_pelanggan->count() > 0) {
+        if($query_pelanggan->count() > 0) {
             $pelanggan = $query_pelanggan->first();
             return ApiFormatter::createApi(200, 'Success', $pelanggan);
         }
