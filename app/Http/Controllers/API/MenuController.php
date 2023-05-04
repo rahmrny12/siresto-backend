@@ -13,6 +13,7 @@ use App\Models\Meja;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Produk;
+use App\Models\Setting;
 
 class MenuController extends Controller
 {
@@ -113,9 +114,10 @@ class MenuController extends Controller
     {
         $resto = Resto::where('slug', $request->branch)->first();
         $order = Order::where(['no_transaksi' => $request->no_transaksi, 'id_resto' => $resto->id])->first();
+        $setting = Setting::first();
 
         if($order) {
-            return ApiFormatter::createApi(200, 'Success', $order);
+            return ApiFormatter::createApi(200, 'Success', ['order' => $order, 'setting' => $setting]);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
         }
