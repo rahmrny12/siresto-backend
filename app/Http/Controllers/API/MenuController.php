@@ -58,7 +58,7 @@ class MenuController extends Controller
         $pelanggan = Pelanggan::create(['no_telepon' => $request->no_telepon, 'nama_pelanggan' => $request->nama_pelanggan, 'id_resto' => $resto->id]);
         $meja = Meja::where('no_meja', $request->meja)->where('id_resto', $resto->id)->first();
 
-        if($no_transaksi == 0) {
+        if($no_transaksi === 0) {
             $order = Order::create([
                 'no_transaksi' => $this->no_transaksi(),
                 'nilai_transaksi' => $request->total,
@@ -113,11 +113,11 @@ class MenuController extends Controller
             }
         } else {
             $order_sebelumnya = Order::where('id_resto', $resto->id)->where('no_transaksi', $no_transaksi)->first();
-            $order = Order::
+            $order_update = Order::
                         where('id_resto', $resto->id)
                         ->where('no_transaksi', $no_transaksi)
                         ->update([
-                            'nilai_transaksi' => (int) $order_sebelumnya->total + (int) $request->total,
+                            'nilai_transaksi' => (int) $order_sebelumnya->nilai_transaksi + (int) $request->total,
                             'nilai_laba' => (int) $order_sebelumnya->nilai_laba + (int) $request->nilai_laba,
                             'diskon' => (int) $order_sebelumnya->diskon +  (int) $request->diskon,
                         ]);
@@ -128,8 +128,9 @@ class MenuController extends Controller
             foreach ($request->produk as $key => $produk) {
                 $produk_db = Produk::where('id', $produk['id'])->first();
                 $produk_order_detail = OrderDetail::where('id_order', $id_order)->where('id_produk', $produk['id']);
+                $data_produk_order_detail = $produk_order_detail->first();
                 if($produk_order_detail->count() == 0) {
-                    
+
                     $laba = ($produk_db->harga_jual - $produk_db->harga_awal) - $produk_db->diskon;
                     $total_harga_jual = ($produk_db->harga_jual - $produk_db->diskon) * $produk['jumlah'];
                     $total_laba = (($produk_db->harga_jual - $produk_db->diskon) - $produk_db->harga_awal) * $produk['jumlah'];
@@ -151,14 +152,14 @@ class MenuController extends Controller
                 } else {
 
                     $laba = ($produk_db->harga_jual - $produk_db->harga_awal) - $produk_db->diskon;
-                    $total_harga_jual = ($produk_db->harga_jual - $produk_db->diskon) * ($produk['jumlah'] + $produk_order_detail->jumlah);
-                    $total_laba = (($produk_db->harga_jual - $produk_db->diskon) - $produk_db->harga_awal) * ($produk['jumlah'] + $produk_order_detail->jumlah);
+                    $total_harga_jual = ($produk_db->harga_jual - $produk_db->diskon) * ($produk['jumlah'] + $data_produk_order_detail->jumlah_beli);
+                    $total_laba = (($produk_db->harga_jual - $produk_db->diskon) - $produk_db->harga_awal) * ($produk['jumlah'] + $data_produk_order_detail->jumlah_beli);
 
                     OrderDetail::
                         where('id_order', $id_order)
                         ->where('id_produk', $produk['id'])
                         ->update([
-                            'jumlah_beli' => ($produk['jumlah'] + $produk_order_detail->jumlah),
+                            'jumlah_beli' => ($produk['jumlah'] + $data_produk_order_detail->jumlah_beli),
                             'total_harga_jual' => $total_harga_jual,
                             'total_laba' => $total_laba,
                             'catatan' => '',
@@ -170,7 +171,7 @@ class MenuController extends Controller
             }
 
             DB::table('order_detail')->insert($order_detail);
-            $data = Order::where('id', '=', $order->id)->first();
+            $data = Order::where('id', '=', $id_order)->first();
 
             if($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
