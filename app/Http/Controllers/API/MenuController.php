@@ -97,7 +97,7 @@ class MenuController extends Controller
             ];
         }
 
-        OrderDetail::createMany($order_detail);
+        DB::table('order_detail')->insert($order_detail);
         $data = Order::where('id', '=', $order->id)->first();
 
         if($data) {
