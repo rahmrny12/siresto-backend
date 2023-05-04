@@ -43,19 +43,6 @@ class OrderController extends Controller
         }
     }
 
-    public function cari_order_by_transaksi(Request $request)
-    {
-        $meja = Meja::where('uuid', $request->code)->first();
-        $guest = $request->guest;
-        $order = Order::where(['id_resto' => $meja->id_resto, 'code_user' => $guest])->get();
-
-        if($order) {
-            return ApiFormatter::createApi(200, 'Success', $order);
-        } else {
-            return ApiFormatter::createApi(400, 'Failed');
-        }
-    }
-
     public function no_transaksi()
     {
         $q = DB::table('order')->select(DB::raw('MAX(RIGHT(no_transaksi, 4)) AS kd_max'))->whereRaw('DATE(created_at) = DATE(NOW())')->get();

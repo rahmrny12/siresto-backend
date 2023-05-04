@@ -116,6 +116,7 @@ Route::prefix('dashboard')->group(function() {
 Route::post('pembayaran', [PembayaranController::class, 'store']);
 Route::get('menu/cek-pelanggan', [MenuController::class, 'cek_pelanggan']);
 Route::post('menu/simpan-order-pelanggan', [MenuController::class, 'simpan_order_pelanggan']);
+Route::get('menu/cari-order-transaksi', [MenuController::class, 'cari_order_transaksi']);
 
 // auth admin
 Route::group(['prefix' => 'auth'], function ($router) {

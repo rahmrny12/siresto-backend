@@ -59,8 +59,10 @@ class MenuController extends Controller
             'no_transaksi' => $this->no_transaksi(),
             'nilai_transaksi' => $request->total,
             'nilai_laba' => $request->nilai_laba,
+            'source' => $request->source,
             'bayar' => 0,
             'kembali' => 0,
+            'nama_pelanggan' => $request->nama_pelanggan,
             'id_pelanggan' => $pelanggan->id,
             'id_resto' => $resto->id,
             'id_meja' => $meja->id,
@@ -102,6 +104,18 @@ class MenuController extends Controller
 
         if($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
+        } else {
+            return ApiFormatter::createApi(400, 'Failed');
+        }
+    }
+
+    public function cari_order_transaksi(Request $request)
+    {
+        $resto = Resto::where('slug', $request->branch)->first();
+        $order = Order::where(['no_transaksi' => $request->no_transaksi, 'id_resto' => $resto->id])->first();
+
+        if($order) {
+            return ApiFormatter::createApi(200, 'Success', $order);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
         }
