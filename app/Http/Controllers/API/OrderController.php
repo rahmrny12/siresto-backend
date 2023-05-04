@@ -56,12 +56,6 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function no_transaksi()
     {
         $q = DB::table('order')->select(DB::raw('MAX(RIGHT(no_transaksi, 4)) AS kd_max'))->whereRaw('DATE(created_at) = DATE(NOW())')->get();
@@ -78,66 +72,6 @@ class OrderController extends Controller
         return 'TRN'.date('dmy').$kd;
     }
 
-    public function simpan_order_konsumen(Request $request)
-    {
-        $resto = Resto::where('slug', $request->branch)->firstOrFail();
-        $meja = Meja::where('no_meja', $request->meja)->where('id_resto', $resto->id)->first();
-        $order = Order::create([
-            'no_transaksi' => $this->no_transaksi(),
-            'nilai_transaksi' => $request->subtotal,
-            'nilai_laba' => $request->nilai_laba,
-            'bayar' => 0,
-            'kembali' => 0,
-            'nama_customer' => $request->nama_pelanggan,
-            'id_resto' => $resto->id,
-            'id_meja' => $meja->id,
-            'diskon' => $request->diskon,
-            'metode_pembayaran' => '',
-            'status_order' => 'open',
-            'status_bayar' => 'not_paid',
-            'code_user' => $request('code_user'),
-            'uuid' => Str::uuid(),
-            'pajak' => $request->pajak,
-            'service_charge' => $request->service_charge,
-        ]);
-        
-        $id_order = $order->id;
-
-        $order_detail = [];
-        $id_order_detail_update = [];
-        foreach ($request->produk as $key => $produk) {
-            $produk_db = DB::table('produk')->where('id', $produk['id'])->first();
-            $orderDetail = OrderDetail::where(['id_produk' => $produk['id'], 'id_order' => $id_order]);
-
-            $laba = ($produk_db->harga_jual - $produk_db->harga_awal) - $produk_db->diskon;
-            $total_harga_jual = (($produk_db->harga_jual - $produk_db->diskon) * $produk['jumlah']);
-            $total_laba = (($produk_db->harga_jual - $produk_db->diskon) - $produk_db->harga_awal) * $produk['jumlah'];
-
-            $order_detail[] = [
-                'id_order' => $id_order,
-                'id_produk' => $produk['id'],
-                'jumlah_beli' => $produk['jumlah'],
-                'harga_jual' => $produk_db->harga_jual,
-                'laba' => $laba,
-                'total_harga_jual' => $total_harga_jual,
-                'total_laba' => $total_laba,
-                'diskon' => $produk_db->diskon,
-                'catatan' => '',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ];
-        }
-
-        DB::table('order_detail')->insert($order_detail);
-        $data = Order::where('id', '=', $order->id)->first();
-
-        if($data) {
-            return ApiFormatter::createApi(200, 'Success', $data);
-        } else {
-            return ApiFormatter::createApi(400, 'Failed');
-        }
-    }
-
     public function store(Request $request)
     {
         $user = $request->user();
@@ -147,7 +81,7 @@ class OrderController extends Controller
             'nilai_transaksi' => $request->subtotal,
             'bayar' => $request->pembayaran,
             'kembali' => $request->kembalian,
-            'nama_customer' => $request->nama_pelanggan,
+            'nama_pelanggan' => $request->nama_pelanggan,
             'id_resto' => $id_resto,
             'id_meja' => $request->id_meja,
             'diskon' => $request->diskon,

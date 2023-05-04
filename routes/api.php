@@ -115,6 +115,7 @@ Route::prefix('dashboard')->group(function() {
 // frontend
 Route::post('pembayaran', [PembayaranController::class, 'store']);
 Route::get('menu/cek-pelanggan', [MenuController::class, 'cek_pelanggan']);
+Route::post('menu/simpan-order-pelanggan', [MenuController::class, 'simpan_order_pelanggan']);
 
 // auth admin
 Route::group(['prefix' => 'auth'], function ($router) {

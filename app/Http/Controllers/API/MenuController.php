@@ -7,6 +7,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Pelanggan;
+use App\Models\Resto;
+use App\Models\Meja;
+use App\Models\Order;
+use App\Models\OrderDetail;
+use App\Models\Produk;
 
 class MenuController extends Controller
 {
@@ -25,51 +30,79 @@ class MenuController extends Controller
         }
 
         $pelanggan = null;
-        return ApiFormatter::createApi(400, 'Data Kosong', $pelanggan);
+        return ApiFormatter::createApi(200, 'Data Kosong', $pelanggan);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function no_transaksi()
     {
-        //
+        $q = DB::table('order')->select(DB::raw('MAX(RIGHT(no_transaksi, 4)) AS kd_max'))->whereRaw('DATE(created_at) = DATE(NOW())')->get();
+
+        $kd = "";
+        if($q->count() > 0){
+            foreach($q as $k){
+                $tmp = ((int) $k->kd_max) + 1;
+                $kd = sprintf("%04s", $tmp);
+            }
+        }else{
+            $kd = "0001";
+        }
+        return 'TRN'.date('dmy').$kd;
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function simpan_order_pelanggan(Request $request)
     {
-        //
-    }
+        $resto = Resto::where('slug', $request->branch)->firstOrFail();
+        $pelanggan = Pelanggan::create(['no_telepon' => $request->no_telepon, 'nama_pelanggan' => $request->nama_pelanggan, 'id_resto' => $resto->id]);
+        $meja = Meja::where('no_meja', $request->meja)->where('id_resto', $resto->id)->first();
+        $order = Order::create([
+            'no_transaksi' => $this->no_transaksi(),
+            'nilai_transaksi' => $request->total,
+            'nilai_laba' => $request->nilai_laba,
+            'bayar' => 0,
+            'kembali' => 0,
+            'id_pelanggan' => $pelanggan->id,
+            'id_resto' => $resto->id,
+            'id_meja' => $meja->id,
+            'diskon' => $request->diskon,
+            'metode_pembayaran' => '',
+            'status_order' => 'open',
+            'status_bayar' => 'not_paid',
+            'pajak' => $request->pajak,
+            'service_charge' => $request->service_charge,
+        ]);
+        
+        $id_order = $order->id;
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
+        $order_detail = [];
+        foreach ($request->produk as $key => $produk) {
+            $produk_db = Produk::where('id', $produk['id'])->first();
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+            $laba = ($produk_db->harga_jual - $produk_db->harga_awal) - $produk_db->diskon;
+            $total_harga_jual = ($produk_db->harga_jual - $produk_db->diskon) * $produk['jumlah'];
+            $total_laba = (($produk_db->harga_jual - $produk_db->diskon) - $produk_db->harga_awal) * $produk['jumlah'];
+
+            $order_detail[] = [
+                'id_order' => $id_order,
+                'id_produk' => $produk['id'],
+                'jumlah_beli' => $produk['jumlah'],
+                'harga_jual' => $produk_db->harga_jual,
+                'laba' => $laba,
+                'total_harga_jual' => $total_harga_jual,
+                'total_laba' => $total_laba,
+                'diskon' => $produk_db->diskon,
+                'catatan' => '',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+        }
+
+        OrderDetail::createMany($order_detail);
+        $data = Order::where('id', '=', $order->id)->first();
+
+        if($data) {
+            return ApiFormatter::createApi(200, 'Success', $data);
+        } else {
+            return ApiFormatter::createApi(400, 'Failed');
+        }
     }
 }
