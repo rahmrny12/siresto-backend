@@ -27,6 +27,7 @@ class ProdukController extends Controller
         $query->where('id_resto', $id_resto);
         if ($s = request()->input('s')) {
             $query->where(function ($query) {
+                $s = request()->input('s');
                 $query->where('nama_produk', 'LIKE', "%$s%")
                     ->orWhere('nomor_sku', 'LIKE', "%$s%");
             });
