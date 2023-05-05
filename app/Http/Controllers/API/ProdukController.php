@@ -29,7 +29,7 @@ class ProdukController extends Controller
             $query->where(function (Builder $query) {
                 $query->where('nama_produk', 'LIKE', "%$s%")
                     ->orWhere('nomor_sku', 'LIKE', "%$s%");
-            })
+            });
         }
 
         if($id_kategori = request()->input('id_kategori')) {
