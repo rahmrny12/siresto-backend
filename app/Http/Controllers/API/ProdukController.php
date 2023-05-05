@@ -22,12 +22,14 @@ class ProdukController extends Controller
     public function index()
     {
         $query = Produk::query();
-        $id_resto = auth()->user()->id_resto;
+        $id_resto = request()->user()->id_resto;
 
         $query->where('id_resto', $id_resto);
         if ($s = request()->input('s')) {
-            $query->where('nama_produk', 'ILIKE', "%$s%")
-                ->orWhere('nomor_sku', 'ILIKE', "%$s%");
+            $query->where(function (Builder $query) {
+                $query->where('nama_produk', 'LIKE', "%$s%")
+                    ->orWhere('nomor_sku', 'LIKE', "%$s%");
+            })
         }
 
         if($id_kategori = request()->input('id_kategori')) {
