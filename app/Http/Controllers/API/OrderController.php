@@ -23,7 +23,9 @@ class OrderController extends Controller
     public function index()
     {
         $query = Order::query();
-        $id_resto = auth()->user()->id_resto;
+        $id_resto = request()->user()->id_resto;
+
+        dd($id_resto);
 
         $query->where('id_resto', $id_resto);
         if ($s = request()->input('s')) {
