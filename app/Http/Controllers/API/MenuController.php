@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Helper\ApiFormatter;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\Pelanggan;
@@ -76,6 +77,7 @@ class MenuController extends Controller
                 'status_bayar' => 'not_paid',
                 'pajak' => $request->pajak,
                 'service_charge' => $request->service_charge,
+                'uuid' => Str::uuid(),
             ]);
             
             $id_order = $order->id;
