@@ -70,9 +70,9 @@ Route::get('meja/no-meja', 'API\MejaController@no_meja');
 Route::get('meja/all', 'API\MejaController@meja_all');
 
 // order
-Route::apiResource('order', OrderController::class)->except('show');
-Route::get('order/cari-order-transaksi', [OrderController::class, 'cari_order_by_transaksi']);
-Route::post('order/simpan-order-konsumen', [OrderController::class, 'simpan_order_konsumen']);
+Route::apiResource('order', OrderController::class)->except('show')->middleware('auth:api');
+Route::get('order/cari-order-transaksi', [OrderController::class, 'cari_order_by_transaksi'])->middleware('auth:api');
+Route::post('order/simpan-order-konsumen', [OrderController::class, 'simpan_order_konsumen'])->middleware('auth:api');
 
 Route::prefix('order')->group(function() {
     Route::patch('/ubah-status-order/{order}', [OrderController::class, 'ubah_status_profile']);
