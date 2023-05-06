@@ -76,7 +76,7 @@ Route::post('order/simpan-order-konsumen', [OrderController::class, 'simpan_orde
 
 Route::prefix('order')->group(function() {
     Route::patch('/ubah-status-order/{order}', [OrderController::class, 'ubah_status_profile']);
-    Route::get('/meja', [OrderController::class, 'meja']);
+    Route::get('/meja', [OrderController::class, 'meja'])->middleware('auth:api');
 });
 
 // laporan
