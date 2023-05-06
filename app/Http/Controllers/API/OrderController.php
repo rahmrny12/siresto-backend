@@ -138,7 +138,7 @@ class OrderController extends Controller
         try{
             $s = $request->s;
             $id_resto = request()->user()->id_resto;
-            $data = Meja::select('id as value', 'no_meja as label')->where('no_meja', 'ILIKE', "%$s%")->where('id_resto', $id_resto);->get();
+            $data = Meja::select('id as value', 'no_meja as label')->where('no_meja', 'ILIKE', "%$s%")->where('id_resto', $id_resto)->get();
 
             if($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
