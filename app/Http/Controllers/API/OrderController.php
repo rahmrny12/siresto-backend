@@ -183,10 +183,11 @@ class OrderController extends Controller
             'id_resto' => $id_resto,
             'diskon' => $request->diskon,
             'nilai_transaksi' => $request->subtotal,
+            'status_order' => $request->status_order,
             'metode_pembayaran' => $request->metode_pembayaran,
             'bayar' => $request->pembayaran,
             'kembali' => $request->kembalian,
-            'status_bayar' => 'already_paid',
+            'status_bayar' => $request->status_bayar,
         ]);
         
         $data = Order::where('id', $order->id)->first();
