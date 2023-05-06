@@ -96,14 +96,12 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login()
+    public function login(Request $request)
     {
-        $credentials = request()->validate([
-            'email' => 'required',
-            'password' => 'required'
-        ]);
+        $fieldType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $request->validate(['email' => 'required','password' => 'required']);
 
-        if (!auth()->attempt($credentials)) {
+        if (!auth()->attempt([$fieldType => $request->email, 'password' => $request->password])) {
             return ApiFormatter::createApi(400, 'Email Atau Password Salah', [
                 'success' => false,
                 'data' => null
