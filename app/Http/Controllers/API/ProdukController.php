@@ -33,8 +33,8 @@ class ProdukController extends Controller
             });
         }
 
-        if($id_kategori = request()->input('id_kategori')) {
-            if($id_kategori != 0) {
+        if ($id_kategori = request()->input('id_kategori')) {
+            if ($id_kategori != 0) {
                 $query->where('id_kategori_produk', '=', $id_kategori);
             }
         }
@@ -49,7 +49,7 @@ class ProdukController extends Controller
         $data['data'] = $result;
         $data['total_produk'] = $query->count();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -60,7 +60,7 @@ class ProdukController extends Controller
     {
         $query = Produk::query();
 
-        if($slug = request('resto')) {
+        if ($slug = request('resto')) {
             $resto = Resto::where('slug', $slug)->first();
             $query->where('id_resto', $resto->id);
         }
@@ -70,8 +70,8 @@ class ProdukController extends Controller
                 ->orWhere('nomor_sku', 'ILIKE', "%$s%");
         }
 
-        if($id_kategori = request()->input('id_kategori')) {
-            if($id_kategori != 0) {
+        if ($id_kategori = request()->input('id_kategori')) {
+            if ($id_kategori != 0) {
                 $query->where('id_kategori_produk', '=', $id_kategori);
             }
         }
@@ -84,7 +84,7 @@ class ProdukController extends Controller
 
         $data = $query->paginate($perPage);
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -98,12 +98,12 @@ class ProdukController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {   
+    {
         $gambar = '';
-        if($request->gambar_produk) {
-            $gambar = time().'.' . explode('/', explode(':', substr($request->gambar_produk, 0, strpos($request->gambar_produk, ';')))[1])[1];
+        if ($request->gambar_produk) {
+            $gambar = time() . '.' . explode('/', explode(':', substr($request->gambar_produk, 0, strpos($request->gambar_produk, ';')))[1])[1];
 
-            \Image::make($request->gambar_produk)->save(public_path('images/produk/').$gambar);
+            \Image::make($request->gambar_produk)->save(public_path('images/produk/') . $gambar);
         } else {
             $gambar = $request->gambar_produk_lama;
         }
@@ -111,7 +111,7 @@ class ProdukController extends Controller
         $user = $request->user();
         $id_resto = $user->id_resto;
 
-        try{
+        try {
             $produk = Produk::create([
                 'nama_produk' => $request->nama_produk,
                 'id_kategori_produk' => $request->id_kategori_produk,
@@ -128,12 +128,12 @@ class ProdukController extends Controller
 
             $data = Produk::where('id', '=', $produk->id)->get();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, $error->errorInfo[2]);
         }
     }
@@ -148,7 +148,7 @@ class ProdukController extends Controller
     {
         $data = Produk::findOrFail($id);
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -167,11 +167,11 @@ class ProdukController extends Controller
         $gambar = '';
         $produk = Produk::findOrFail($id);
 
-        if($request->gambar_produk) {
-            @unlink('images/produk/'. $produk->gambar); // hapus gambar
+        if ($request->gambar_produk) {
+            @unlink('images/produk/' . $produk->gambar); // hapus gambar
 
-            $gambar = time().'.' . explode('/', explode(':', substr($request->gambar_produk, 0, strpos($request->gambar_produk, ';')))[1])[1];
-            \Image::make($request->gambar_produk)->save(public_path('images/produk/').$gambar);
+            $gambar = time() . '.' . explode('/', explode(':', substr($request->gambar_produk, 0, strpos($request->gambar_produk, ';')))[1])[1];
+            \Image::make($request->gambar_produk)->save(public_path('images/produk/') . $gambar);
             $gambar = 'images/produk/' . $gambar;
         } else {
             $gambar = $produk->gambar_produk_lama;
@@ -192,7 +192,7 @@ class ProdukController extends Controller
         ]);
 
         $data = Produk::where('id', '=', $id)->get();
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -208,10 +208,10 @@ class ProdukController extends Controller
     public function destroy($id)
     {
         $produk = Produk::findOrFail($id);
-        @unlink('images/produk/'. $produk->gambar); // hapus gambar 
+        @unlink('images/produk/' . $produk->gambar); // hapus gambar
         $data = $produk->delete();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success Destroy Data');
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -224,7 +224,7 @@ class ProdukController extends Controller
         $action_change_status = Produk::where('id', $produk->id)->update(['status_produk' => $status_produk]);
         $data = Produk::findOrFail($produk->id);
 
-        if($produk) {
+        if ($produk) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');

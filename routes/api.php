@@ -9,13 +9,13 @@ use App\Http\Controllers\API\KategoriBisnisController;
 use App\Http\Controllers\API\KategoriProdukController;
 use App\Http\Controllers\API\LevelController;
 use App\Http\Controllers\API\ProdukController;
-use App\Http\Controllers\API\MejaController;
 use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\LaporanController;
 use App\Http\Controllers\API\PromoController;
 use App\Http\Controllers\API\StaffController;
 use App\Http\Controllers\API\SettingController;
 use App\Http\Controllers\API\DashboardController;
+use App\Http\Controllers\API\MejaController;
 use App\Http\Controllers\API\PembayaranController;
 use App\Http\Controllers\API\MenuController;
 
@@ -37,7 +37,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // resto
 Route::apiResource('/resto', RestoController::class)->except('show')->middleware('auth:api');
 Route::get('resto/setting-resto', [RestoController::class, 'setting_resto']); // mengambil setting resto
-Route::prefix('resto')->group(function() {
+Route::prefix('resto')->group(function () {
     Route::get('/show', [RestoController::class, 'resto_row']);
     Route::get('/all', [RestoController::class, 'resto_all']);
     Route::put('/ubah-status/{resto}', [RestoController::class, 'ubah_status']);
@@ -46,7 +46,7 @@ Route::prefix('resto')->group(function() {
 // kategori-bisnis
 Route::apiResource('/kategori-bisnis', KategoriBisnisController::class)->except('show');
 Route::get('kategori-bisnis/all', [KategoriBisnisController::class, 'kategori_bisnis_all']);
-Route::prefix('kategori-bisnis')->group(function() {
+Route::prefix('kategori-bisnis')->group(function () {
     Route::post('/insert-select', [KategoriBisnisController::class, 'insert_select']);
 });
 
@@ -66,21 +66,21 @@ Route::get('produk/produk-home', [ProdukController::class, 'produk_home']);
 
 // meja
 Route::apiResource('meja', MejaController::class)->except('show')->middleware('auth:api');
-Route::get('meja/no-meja', 'API\MejaController@no_meja');
-Route::get('meja/all', 'API\MejaController@meja_all');
+Route::get('meja/no-meja', [MejaController::class, 'no_meja']);
+Route::get('meja/all', [MejaController::class, 'meja_all']);
 
 // order
 Route::apiResource('order', OrderController::class)->except('show')->middleware('auth:api');
 Route::get('order/cari-order-transaksi', [OrderController::class, 'cari_order_by_transaksi'])->middleware('auth:api');
 Route::post('order/simpan-order-konsumen', [OrderController::class, 'simpan_order_konsumen'])->middleware('auth:api');
 
-Route::prefix('order')->group(function() {
+Route::prefix('order')->group(function () {
     Route::patch('/ubah-status-order/{order}', [OrderController::class, 'ubah_status_profile']);
     Route::get('/meja', [OrderController::class, 'meja'])->middleware('auth:api');
 });
 
 // laporan
-Route::prefix('laporan')->group(function() {
+Route::prefix('laporan')->group(function () {
     Route::get('/laporan-penjualan', [LaporanController::class, 'laporan_penjualan'])->middleware('auth:api');
     Route::get('/laporan-pendapatan', [LaporanController::class, 'laporan_pendapatan'])->middleware('auth:api');
 });
@@ -90,13 +90,13 @@ Route::apiResource('promo', PromoController::class)->middleware('auth:api');
 
 // staff
 Route::apiResource('staff', StaffController::class)->middleware('auth:api');
-Route::prefix('staff')->group(function() {
+Route::prefix('staff')->group(function () {
     Route::put('/reset-password/{staff}', [StaffController::class, 'reset_password'])->middleware('auth:api');
     Route::put('/ubah-profile/{staff}', [StaffController::class, 'ubah_profile'])->middleware('auth:api');
 });
 
 // setting
-Route::prefix('setting')->group(function() {
+Route::prefix('setting')->group(function () {
     Route::get('/', [SettingController::class, 'index'])->middleware('auth:api');
     Route::post('/', [SettingController::class, 'store'])->middleware('auth:api');
     Route::put('/profile', [SettingController::class, 'profile'])->middleware('auth:api');
@@ -107,7 +107,7 @@ Route::prefix('setting')->group(function() {
 });
 
 // dashboard
-Route::prefix('dashboard')->group(function() {
+Route::prefix('dashboard')->group(function () {
     Route::get('/owner', [DashboardController::class, 'owner'])->middleware('auth:api');
     Route::get('/superadmin', [DashboardController::class, 'superadmin'])->middleware('auth:api');
 });

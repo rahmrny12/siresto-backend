@@ -41,7 +41,7 @@ class AuthController extends Controller
             'product_id' => 'required',
         ]);
 
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Ada Kesalahan',
@@ -99,7 +99,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $fieldType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-        $request->validate(['email' => 'required','password' => 'required']);
+        $request->validate(['email' => 'required', 'password' => 'required']);
 
         if (!auth()->attempt([$fieldType => $request->email, 'password' => $request->password])) {
             return ApiFormatter::createApi(400, 'Email Atau Password Salah', [
@@ -110,7 +110,7 @@ class AuthController extends Controller
 
         $auth = auth()->user();
 
-        if($auth->level->level == 'Staff') {
+        if ($auth->level->level == 'Staff') {
             $owner = User::where('id_resto', $auth->id_resto)->where('id_level', 2)->first();
             $lisence = $owner->lisence->lisence;
         } else {
@@ -164,7 +164,7 @@ class AuthController extends Controller
      * @param  string $token
      *
      * @return \Illuminate\Http\JsonResponse
-     */ 
+     */
     protected function respondWithToken($token)
     {
         return response()->json([
