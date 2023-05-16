@@ -19,15 +19,15 @@ class PembayaranController extends Controller
         $q = DB::table('order')->select(DB::raw('MAX(RIGHT(no_transaksi, 4)) AS kd_max'))->whereRaw('DATE(created_at) = DATE(NOW())')->get();
 
         $kd = "";
-        if($q->count() > 0){
-            foreach($q as $k){
+        if ($q->count() > 0) {
+            foreach ($q as $k) {
                 $tmp = ((int) $k->kd_max) + 1;
                 $kd = sprintf("%04s", $tmp);
             }
-        }else{
+        } else {
             $kd = "0001";
         }
-        return 'TRN'.date('dmy').$kd;
+        return 'TRN' . date('dmy') . $kd;
     }
 
     public function store(Request $request)
@@ -77,7 +77,7 @@ class PembayaranController extends Controller
         DB::table('order_detail')->insert($data_order_detail);
         $data = Order::where('id', $order->id)->first();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');

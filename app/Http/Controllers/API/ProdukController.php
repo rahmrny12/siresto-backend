@@ -174,7 +174,7 @@ class ProdukController extends Controller
             \Image::make($request->gambar_produk)->save(public_path('images/produk/') . $gambar);
             $gambar = 'images/produk/' . $gambar;
         } else {
-            $gambar = $produk->gambar_produk_lama;
+            $gambar = $produk->gambar;
         }
 
         $id_resto = $request->user()->id_resto;
