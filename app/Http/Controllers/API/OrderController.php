@@ -67,12 +67,14 @@ class OrderController extends Controller
         $id_resto = $user->id_resto;
         $order = Order::create([
             'no_transaksi' => $this->no_transaksi(),
-            'nilai_transaksi' => $request->subtotal,
+            'nilai_transaksi' => $request->total_semua,
             'bayar' => $request->pembayaran,
             'kembali' => $request->kembalian,
             'nama_pelanggan' => $request->nama_pelanggan,
             'id_resto' => $id_resto,
             'id_meja' => $request->id_meja,
+            'pajak' => $request->pajak,
+            'service_charge' => $request->charge_service,
             'diskon' => $request->diskon,
             'metode_pembayaran' => $request->metode_pembayaran,
             'status_order' => 'in_progress',
