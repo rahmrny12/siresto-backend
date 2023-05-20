@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Exception;
 
 use App\Models\Promo;
+use App\Models\Resto;
 
 class PromoController extends Controller
 {
@@ -34,7 +35,20 @@ class PromoController extends Controller
         $result = $query->paginate($perPage);
         $data = $result;
 
-        if($data) {
+        if ($data) {
+            return ApiFormatter::createApi(200, 'Success', $data);
+        } else {
+            return ApiFormatter::createApi(400, 'Failed');
+        }
+    }
+
+    public function promo_menu()
+    {
+        $slug = request('resto');
+        $resto = Resto::where('slug', $slug)->first();
+        $data = Promo::where('id_resto', $resto->id)->orderByDesc('id')->get();
+
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -43,21 +57,21 @@ class PromoController extends Controller
 
     public function store(Request $request)
     {
-    	$gambar = '';
-        if($request->gambar) {
-            $gambar = time().'.' . explode('/', explode(':', substr($request->gambar, 0, strpos($request->gambar, ';')))[1])[1];
+        $gambar = '';
+        if ($request->gambar) {
+            $gambar = time() . '.' . explode('/', explode(':', substr($request->gambar, 0, strpos($request->gambar, ';')))[1])[1];
 
-            \Image::make($request->gambar)->save(public_path('images/promo/').$gambar);
+            \Image::make($request->gambar)->save(public_path('images/promo/') . $gambar);
         } else {
             $gambar = $request->gambar_lama;
         }
 
         $id_resto = request()->user()->id_resto;
 
-        try{
+        try {
             $promo = Promo::create([
                 'judul_promo' => $request->judul_promo,
-                'gambar' => 'images/promo/'.$gambar,
+                'gambar' => 'images/promo/' . $gambar,
                 'tanggal_awal_promo' => $request->tanggal_awal_promo,
                 'periode_promo' => $request->periode_promo,
                 'deskripsi_promo' => $request->deskripsi_promo,
@@ -68,29 +82,29 @@ class PromoController extends Controller
 
             $data = Promo::where('id', $promo->id)->first();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, $error->errorInfo[2]);
         }
     }
 
     public function update(Request $request, $id)
     {
-        try{
+        try {
             $gambar = '';
             $promo = Promo::findOrFail($id);
 
-            if($request->gambar != null) {
-                @unlink('images/promo/'. $promo->gambar);
-                $gambar = time().'.' . explode('/', explode(':', substr($request->gambar, 0, strpos($request->gambar, ';')))[1])[1];
+            if ($request->gambar != null) {
+                @unlink('images/promo/' . $promo->gambar);
+                $gambar = time() . '.' . explode('/', explode(':', substr($request->gambar, 0, strpos($request->gambar, ';')))[1])[1];
 
-                \Image::make($request->gambar)->save(public_path('images/promo/').$gambar);
+                \Image::make($request->gambar)->save(public_path('images/promo/') . $gambar);
 
-                $gambar = 'images/promo/'. $gambar;
+                $gambar = 'images/promo/' . $gambar;
             } else {
                 $gambar = $promo->gambar;
             }
@@ -110,12 +124,12 @@ class PromoController extends Controller
 
             $data = Promo::where('id', $id)->first();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, $error);
         }
     }
@@ -123,10 +137,10 @@ class PromoController extends Controller
     public function destroy($id)
     {
         $promo = Promo::findOrFail($id);
-        @unlink('images/promo/'. $promo->gambar);
+        @unlink('images/promo/' . $promo->gambar);
         $data = $promo->delete();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success Destroy Data');
         } else {
             return ApiFormatter::createApi(400, 'Failed');

@@ -34,8 +34,8 @@ class KategoriProdukController extends Controller
         $perPage = request()->limit;
         $result = $query->paginate($perPage);
         $data = $result;
-        
-        if($data) {
+
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -49,7 +49,7 @@ class KategoriProdukController extends Controller
         $resto = Resto::where('slug', $slug)->first();
         $data = KategoriProduk::where('id_resto', $resto->id)->orderByDesc('id')->get();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -64,7 +64,7 @@ class KategoriProdukController extends Controller
      */
     public function store(Request $request)
     {
-        try{
+        try {
             $user = $request->user();
             $id_resto = $user->id_resto;
 
@@ -75,12 +75,12 @@ class KategoriProdukController extends Controller
 
             $data = KategoriProduk::where('id', '=', $kategori_produk->id)->get();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, 'Failed');
         }
     }
@@ -95,7 +95,7 @@ class KategoriProdukController extends Controller
     {
         $data = KategoriProduk::findOrFail($id);
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -111,7 +111,7 @@ class KategoriProdukController extends Controller
      */
     public function update(Request $request, $id)
     {
-        try{
+        try {
             $id_resto = $request->user()->id_resto;
             $kategori_produk = KategoriProduk::where('id', $id)->update([
                 'kategori_produk' => $request->kategori_produk,
@@ -120,12 +120,12 @@ class KategoriProdukController extends Controller
 
             $data = KategoriProduk::where('id', '=', $id)->get();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, 'Failed');
         }
     }
@@ -141,7 +141,7 @@ class KategoriProdukController extends Controller
         $kategori_produk = KategoriProduk::findOrFail($id);
         $data = $kategori_produk->delete();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success Destroy Data');
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -154,7 +154,7 @@ class KategoriProdukController extends Controller
         $s = $request->s;
         $data = KategoriProduk::select('id as value', 'kategori_produk as label')->where('kategori_produk', 'ILIKE', "%$s%")->where('id_resto', $id_resto)->get();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');

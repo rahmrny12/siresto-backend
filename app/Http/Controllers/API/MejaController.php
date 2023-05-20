@@ -34,8 +34,8 @@ class MejaController extends Controller
         $perPage = request()->limit;
         $result = $query->paginate($perPage);
         $data = $result;
-        
-        if($data) {
+
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -45,8 +45,8 @@ class MejaController extends Controller
     public function no_meja(Request $request)
     {
         $data = Meja::where('uuid', $request->_u)->first();
-        
-        if($data) {
+
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -72,7 +72,7 @@ class MejaController extends Controller
 
         $data = Meja::where('id', '=', $meja->id)->get();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -88,7 +88,7 @@ class MejaController extends Controller
      */
     public function update(Request $request, Meja $meja)
     {
-        try{
+        try {
             $id_resto = request()->user()->id_resto;
 
             $action = Meja::where('id', $meja->id)->update([
@@ -98,12 +98,12 @@ class MejaController extends Controller
 
             $data = Meja::where('id', '=', $meja->id)->get();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, 'Failed');
         }
     }
@@ -115,11 +115,11 @@ class MejaController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy(Meja $meja)
-    {   
+    {
         $meja = Meja::findOrFail($meja->id);
         $data = $meja->delete();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success Destroy Data');
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -128,16 +128,16 @@ class MejaController extends Controller
 
     public function meja_all(Request $request)
     {
-        try{
+        try {
             $s = $request->s;
             $data = Meja::select('no_meja as value', 'no_meja as label')->where('no_meja', 'ILIKE', "%$s%")->get();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, 'Failed');
         }
     }

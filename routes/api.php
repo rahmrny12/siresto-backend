@@ -86,6 +86,7 @@ Route::prefix('laporan')->group(function () {
 });
 
 // promo
+Route::get('promo/menu', [PromoController::class, 'promo_menu']);
 Route::apiResource('promo', PromoController::class)->middleware('auth:api');
 
 // staff
