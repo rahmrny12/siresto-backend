@@ -9,6 +9,7 @@ use Exception;
 
 use App\Models\Promo;
 use App\Models\Resto;
+use Carbon\Carbon;
 
 class PromoController extends Controller
 {
@@ -46,7 +47,13 @@ class PromoController extends Controller
     {
         $slug = request('resto');
         $resto = Resto::where('slug', $slug)->first();
-        $data = Promo::where('id_resto', $resto->id)->orderByDesc('id')->get();
+
+        $data = Promo::where('id_resto', $resto->id)
+            ->whereDate('tanggal_awal_promo', '<=', now())
+            ->whereMonth('tanggal_awal_promo', '<=', now())
+            ->whereDate('tanggal_akhir_promo', '>', now())
+            ->whereMonth('tanggal_akhir_promo', '>=', now())
+            ->orderByDesc('id')->get();
 
         if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
@@ -67,12 +74,14 @@ class PromoController extends Controller
         }
 
         $id_resto = request()->user()->id_resto;
+        $tanggal_akhir_promo = date('Y-m-d H:i:s', strtotime($request->tanggal_awal_promo . '+' . $request->periode_promo . 'days'));
 
         try {
             $promo = Promo::create([
                 'judul_promo' => $request->judul_promo,
                 'gambar' => 'images/promo/' . $gambar,
                 'tanggal_awal_promo' => $request->tanggal_awal_promo,
+                'tanggal_akhir_promo' => $tanggal_akhir_promo,
                 'periode_promo' => $request->periode_promo,
                 'deskripsi_promo' => $request->deskripsi_promo,
                 'status_promo' => $request->status_promo,
@@ -110,11 +119,13 @@ class PromoController extends Controller
             }
 
             $id_resto = request()->user()->id_resto;
+            $tanggal_akhir_promo = date('Y-m-d H:i:s', strtotime($request->tanggal_awal_promo . '+' . $request->periode_promo . 'days'));
 
             $promo = Promo::where('id', $id)->update([
                 'judul_promo' => $request->judul_promo,
                 'gambar' => $gambar,
                 'tanggal_awal_promo' => $request->tanggal_awal_promo,
+                'tanggal_akhir_promo' => $tanggal_akhir_promo,
                 'periode_promo' => $request->periode_promo,
                 'deskripsi_promo' => $request->deskripsi_promo,
                 'status_promo' => $request->status_promo,
