@@ -183,7 +183,8 @@ class MenuController extends Controller
     public function cari_order_transaksi(Request $request)
     {
         $resto = Resto::where('slug', $request->branch)->first();
-        $order = Order::where(['no_transaksi' => $request->no_transaksi, 'id_resto' => $resto->id])->first();
+        $noTransaksiArr = explode(",", $request->no_transaksi);
+        $order = Order::whereIn('no_transaksi', $noTransaksiArr)->where('id_resto', $resto->id)->get();
         $setting = Setting::first();
 
         if ($order) {
