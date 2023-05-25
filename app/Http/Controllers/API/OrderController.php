@@ -37,8 +37,8 @@ class OrderController extends Controller
         $perPage = request()->limit;
         $result = $query->paginate($perPage);
         $data = $result;
-        
-        if($data) {
+
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -50,15 +50,15 @@ class OrderController extends Controller
         $q = DB::table('order')->select(DB::raw('MAX(RIGHT(no_transaksi, 4)) AS kd_max'))->whereRaw('DATE(created_at) = DATE(NOW())')->get();
 
         $kd = "";
-        if($q->count() > 0){
-            foreach($q as $k){
+        if ($q->count() > 0) {
+            foreach ($q as $k) {
                 $tmp = ((int) $k->kd_max) + 1;
                 $kd = sprintf("%04s", $tmp);
             }
-        }else{
+        } else {
             $kd = "0001";
         }
-        return 'TRN'.date('dmy').$kd;
+        return 'TRN' . date('dmy') . $kd;
     }
 
     public function store(Request $request)
@@ -113,10 +113,10 @@ class OrderController extends Controller
         }
 
         Order::where('id', $id_order)->update(['nilai_laba' => $total_semua_laba]);
-        DB::table('order_detail')->insert($order_detail);        
+        DB::table('order_detail')->insert($order_detail);
         $data = Order::where('id', '=', $order->id)->get();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -128,7 +128,7 @@ class OrderController extends Controller
         $action = Order::where('id', $order->id)->update(['status_order' => $request->status]);
         $data = Order::where('id', $order->id)->first();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -137,17 +137,17 @@ class OrderController extends Controller
 
     public function meja(Request $request)
     {
-        try{
+        try {
             $s = $request->s;
             $id_resto = request()->user()->id_resto;
             $data = Meja::select('id as value', 'no_meja as label')->where('no_meja', 'ILIKE', "%$s%")->where('id_resto', $id_resto)->get();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, 'Failed');
         }
     }
@@ -162,7 +162,7 @@ class OrderController extends Controller
     {
         $data = Order::findOrFail($id)->with(['order_detail']);
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -191,10 +191,10 @@ class OrderController extends Controller
             'kembali' => $request->kembalian,
             'status_bayar' => $request->status_bayar,
         ]);
-        
+
         $data = Order::where('id', $order->id)->first();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -213,7 +213,7 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         $data = $order->delete();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success Destroy Data');
         } else {
             return ApiFormatter::createApi(400, 'Failed');
