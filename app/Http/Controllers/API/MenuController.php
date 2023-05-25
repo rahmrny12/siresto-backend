@@ -184,7 +184,7 @@ class MenuController extends Controller
     {
         $resto = Resto::where('slug', $request->branch)->first();
         $noTransaksiArr = explode(",", $request->no_transaksi);
-        $order = Order::whereIn('no_transaksi', $noTransaksiArr)->where('id_resto', $resto->id)->get();
+        $order = Order::whereIn('no_transaksi', $noTransaksiArr)->where('id_resto', $resto->id)->latest();
         $setting = Setting::first();
 
         if ($order) {
