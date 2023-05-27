@@ -120,6 +120,7 @@ class AuthController extends Controller
         $success['token'] = auth()->user()->createToken('ewq98gegfNNn77j30u8PwL6sGFhj6aTXRcvrVFNq')->accessToken;;
         $success['name'] = $auth->name;
         $success['username'] = $auth->username;
+        $success['gambar'] = $auth->gambar;
         $success['level'] = $auth->level->level;
         $success['lisence'] = $lisence;
         $success['created_at'] = $auth->created_at;
