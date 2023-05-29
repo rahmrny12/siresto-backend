@@ -39,7 +39,7 @@ class SettingController extends Controller
 
         $setting = Setting::updateOrCreate(['id_resto' => $id_resto], $data);
 
-        if($setting) {
+        if ($setting) {
             return ApiFormatter::createApi(200, 'Success', $setting);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -50,7 +50,7 @@ class SettingController extends Controller
     {
         $user = auth()->user();
 
-        if($user) {
+        if ($user) {
             return ApiFormatter::createApi(200, 'Success', $user);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -59,17 +59,16 @@ class SettingController extends Controller
 
     public function profile(Request $request)
     {
-        try{
+        try {
             $image_name = $request->logo_lama;
-            if($request->logo) {
-                $image_name = time().'.' . explode('/', explode(':', substr($request->logo, 0, strpos($request->logo, ';')))[1])[1];
-                @unlink('images/logo/'. $request->logo_lama); // hapus gambar
+            if ($request->logo) {
+                $image_name = time() . '.' . explode('/', explode(':', substr($request->logo, 0, strpos($request->logo, ';')))[1])[1];
+                @unlink('images/logo/' . $request->logo_lama); // hapus gambar
 
                 \Image::make($request->logo)->save(public_path('images/logo/') . $image_name);
             } else {
-
             }
-            
+
             $user = auth()->user();
             $kategori_bisnis = KategoriBisnis::findOrFail($request->id_kategori_bisnis);
             $upsertResto = Resto::updateOrCreate(
@@ -92,12 +91,12 @@ class SettingController extends Controller
 
             $data = Resto::find($upsertResto->id);
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, $error->message);
         }
     }
@@ -122,7 +121,7 @@ class SettingController extends Controller
 
         $data = User::where('id', $id_user)->first();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -133,10 +132,10 @@ class SettingController extends Controller
     {
         $gambar = '';
         $user = $request->user();
-        if($request->gambar) {
-            @unlink('images/user/'. $user->gambar);
-            $gambar = time().'.' . explode('/', explode(':', substr($request->gambar, 0, strpos($request->gambar, ';')))[1])[1];
-            \Image::make($request->gambar)->save(public_path('images/user/').$gambar);
+        if ($request->gambar) {
+            @unlink('images/user/' . $user->gambar);
+            $gambar = time() . '.' . explode('/', explode(':', substr($request->gambar, 0, strpos($request->gambar, ';')))[1])[1];
+            \Image::make($request->gambar)->save(public_path('images/user/') . $gambar);
             $gambar = 'images/user/' . $gambar;
         } else {
             $gambar = $user->gambar;
@@ -155,7 +154,7 @@ class SettingController extends Controller
 
         $user = User::findOrFail($user->id);
 
-        if($data_user) {
+        if ($data_user) {
             return ApiFormatter::createApi(200, 'Success', $user);
         } else {
             return ApiFormatter::createApi(400, 'Failed');

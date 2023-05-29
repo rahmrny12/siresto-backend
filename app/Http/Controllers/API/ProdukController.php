@@ -119,7 +119,7 @@ class ProdukController extends Controller
                 'gambar' => 'images/produk/' . $gambar,
                 'harga_awal' => $request->harga_awal,
                 'harga_jual' => $request->harga_jual,
-                'diskon' => $request->diskon == '' ? 0 : $request->diskon,
+                'diskon' => $request->status_diskon == 0 ? 0 : $request->diskon,
                 'status_diskon' => $request->status_diskon,
                 'id_resto' => $id_resto,
                 'status_produk' => 1,
@@ -186,7 +186,7 @@ class ProdukController extends Controller
             'gambar' => $gambar,
             'harga_awal' => $request->harga_awal,
             'harga_jual' => $request->harga_jual,
-            'diskon' => $request->diskon == '' ? 0 : $request->diskon,
+            'diskon' => $request->status_diskon == 0 ? 0 : $request->diskon,
             'status_diskon' => $request->status_diskon,
             'id_resto' => $id_resto,
         ]);
