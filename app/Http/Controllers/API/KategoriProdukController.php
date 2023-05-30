@@ -140,9 +140,11 @@ class KategoriProdukController extends Controller
     {
         $kategori_produk = KategoriProduk::findOrFail($id);
         $cek_jumlah = $kategori_produk->produk->count();
-
         if ($cek_jumlah < 0) {
-            $kategori_produk->delete();
+            $data = $kategori_produk->delete();
+        }
+
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success Destroy Data');
         } else {
             return ApiFormatter::createApi(400, 'Failed');
