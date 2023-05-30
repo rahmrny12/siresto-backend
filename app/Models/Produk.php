@@ -15,7 +15,7 @@ class Produk extends Model
 
     public function kategori_produk()
     {
-        return $this->belongsTo(KategoriProduk::class, 'id_kategori_produk');
+        return $this->belongsTo(KategoriProduk::class, 'id_kategori_produk', 'id');
     }
 
     public function resto()
@@ -25,6 +25,6 @@ class Produk extends Model
 
     public function order_detail()
     {
-        return $this->belongsTo(Produk::class, 'id');   
+        return $this->belongsTo(Produk::class, 'id');
     }
 }
