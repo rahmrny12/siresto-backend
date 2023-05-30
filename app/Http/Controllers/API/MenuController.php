@@ -186,7 +186,7 @@ class MenuController extends Controller
         $resto = Resto::where('slug', $request->branch)->first();
         $noTransaksiArr = explode(",", $request->no_transaksi);
         $order = Order::whereIn('no_transaksi', $noTransaksiArr)->where('id_resto', $resto->id)->orderByDesc('id')->get();
-        $setting = Setting::first();
+        $setting = Setting::where('id_resto', $resto->id)->first();
 
         if ($order) {
             return ApiFormatter::createApi(200, 'Success', ['order' => $order, 'setting' => $setting]);
