@@ -78,6 +78,7 @@ class MenuController extends Controller
                 'status_bayar' => 'not_paid',
                 'pajak' => $request->pajak,
                 'service_charge' => $request->service_charge,
+                'status_pembayaran' => $request->status_pembayaran,
                 'uuid' => Str::uuid(),
             ]);
 
