@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Order extends Model
 {
@@ -32,7 +33,7 @@ class Order extends Model
 
     public function meja()
     {
-        return $this->belongsTo(Meja::class, 'id_meja');   
+        return $this->belongsTo(Meja::class, 'id_meja');
     }
 
     // get formatted datetime string for email_verified_at

@@ -15,15 +15,15 @@ class LaporanController extends Controller
 {
     public function laporan_penjualan(Request $request)
     {
-        $tanggal_awal = request('tanggal-awal');
-        $tanggal_akhir = request('tanggal-akhir');
+        $tanggal_awal = date('Y-m-d H:i:s', strtotime(request('tanggal-awal')));
+        $tanggal_akhir = date('Y-m-d H:i:s', strtotime(request('tanggal-akhir')));
 
-        $order = Order::where('created_at', '>=', $tanggal_awal)
-                        ->where('created_at', '<=', $tanggal_akhir)
-                        ->get();
+        $order = Order::whereBetween('created_at', [$tanggal_awal, $tanggal_akhir])
+            ->where('id_resto', auth()->user()->id_resto)
+            ->get();
 
-        if($order) {
-            return ApiFormatter::createApi(200, 'Success', $order);
+        if ($order) {
+            return ApiFormatter::createApi(200, 'php', $order);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
         }
@@ -31,12 +31,12 @@ class LaporanController extends Controller
 
     public function laporan_pendapatan(Request $request)
     {
-        $tanggal_awal = request('tanggal-awal');
-        $tanggal_akhir = request('tanggal-akhir');
+        $tanggal_awal = date('Y-m-d H:i:s', strtotime(request('tanggal-awal')));
+        $tanggal_akhir = date('Y-m-d H:i:s', strtotime(request('tanggal-akhir')));
 
-        $order = Order::where('created_at', '>=', $tanggal_awal)
-                        ->where('created_at', '<=', $tanggal_akhir)
-                        ->get();
+        $order = Order::whereBetween('created_at', [$tanggal_awal, $tanggal_akhir])
+            ->where('id_resto', auth()->user()->id_resto)
+            ->get();
 
         $penjualan_bersih = 0;
         $hpp = 0;
