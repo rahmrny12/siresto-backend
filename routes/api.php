@@ -18,6 +18,7 @@ use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\MejaController;
 use App\Http\Controllers\API\PembayaranController;
 use App\Http\Controllers\API\MenuController;
+use App\Http\Controllers\API\ResetPasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,9 +31,9 @@ use App\Http\Controllers\API\MenuController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
 // resto
 Route::apiResource('/resto', RestoController::class)->except('show')->middleware('auth:api');
@@ -123,6 +124,7 @@ Route::get('menu/cari-order-transaksi', [MenuController::class, 'cari_order_tran
 Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
+    Route::post('reset_password', [ResetPasswordController::class, 'reset_password']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('me', [AuthController::class, 'me']);
