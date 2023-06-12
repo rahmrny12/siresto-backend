@@ -15,6 +15,7 @@ use App\Http\Controllers\API\PromoController;
 use App\Http\Controllers\API\StaffController;
 use App\Http\Controllers\API\SettingController;
 use App\Http\Controllers\API\DashboardController;
+use App\Http\Controllers\API\LisenceController;
 use App\Http\Controllers\API\MejaController;
 use App\Http\Controllers\API\PembayaranController;
 use App\Http\Controllers\API\MenuController;
@@ -58,6 +59,10 @@ Route::get('kategori-produk/all', [KategoriProdukController::class, 'kategori_pr
 
 // level
 Route::apiResource('level', LevelController::class)->except('show');
+
+// Lisence
+Route::get('lisence', [LisenceController::class, 'index']);
+Route::put('lisence/ubah/{id}', [RestoController::class, 'ubah_lisensi']);
 
 // produk
 Route::apiResource('produk', ProdukController::class)->except('show')->middleware('auth:api');

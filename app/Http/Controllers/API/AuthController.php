@@ -98,6 +98,18 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        $user = User::where('email', $request->email)->first();
+        $resto = Resto::find($user->id_resto);
+
+        if ($user->id_level != 1) {
+            if ($resto->status_resto == 0) {
+                return ApiFormatter::createApi(400, 'Email Atau Password Salah', [
+                    'success' => false,
+                    'data' => null
+                ]);
+            }
+        }
+
         $fieldType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
         $request->validate(['email' => 'required', 'password' => 'required']);
 
@@ -117,13 +129,16 @@ class AuthController extends Controller
             $lisence = $auth->lisence->lisence;
         }
 
-        $success['token'] = auth()->user()->createToken('ewq98gegfNNn77j30u8PwL6sGFhj6aTXRcvrVFNq')->accessToken;;
+        $success['token'] = auth()->user()->createToken('ewq98gegfNNn77j30u8PwL6sGFhj6aTXRcvrVFNq')->accessToken;
         $success['name'] = $auth->name;
         $success['username'] = $auth->username;
         $success['gambar'] = $auth->gambar;
         $success['level'] = $auth->level->level;
-        $success['lisence'] = $lisence;
-        $success['created_at'] = $auth->created_at;
+        if ($auth->id_level != '1') {
+            $success['lisence'] = $lisence;
+            $success['created_at'] = $resto->created_at;
+            $success['masa_trial'] = $resto->masa_trial;
+        }
 
         return ApiFormatter::createApi(200, 'Login Berhasil', $success);
     }

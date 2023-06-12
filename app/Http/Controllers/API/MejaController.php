@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Exception;
 
 use App\Models\Meja;
+use App\Models\Resto;
 
 class MejaController extends Controller
 {
@@ -62,6 +63,14 @@ class MejaController extends Controller
     public function store(Request $request)
     {
         $id_resto = request()->user()->id_resto;
+
+        $resto = Resto::find($id_resto);
+
+        $cek_meja = Meja::where('id_resto', $id_resto)->count();
+
+        if ($resto->jumlah_meja <= $cek_meja) {
+            return ApiFormatter::createApi(400, 'Meja Melebihi Batas');
+        }
 
         $meja = Meja::create([
             'no_meja' => $request->no_meja,

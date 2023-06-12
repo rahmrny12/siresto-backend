@@ -11,6 +11,7 @@ use Exception;
 use App\Models\Resto;
 use App\Models\Setting;
 use App\Models\Meja;
+use App\Models\User;
 
 class RestoController extends Controller
 {
@@ -20,7 +21,7 @@ class RestoController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {   
+    {
         $query = Resto::query();
 
         if ($s = request()->input('s')) {
@@ -33,10 +34,15 @@ class RestoController extends Controller
         }
 
         $perPage = request()->limit;
-        $result = $query->paginate($perPage);
+        $result = $query
+            ->with('users')
+            ->whereHas('users', function ($query) {
+                $query->where('id_level', '2');
+            })
+            ->paginate($perPage);
         $data = $result;
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -52,16 +58,16 @@ class RestoController extends Controller
 
     public function resto_all(Request $request)
     {
-        try{
+        try {
             $s = $request->s;
             $data = Resto::select('id as value', 'nama_resto as label')->where('nama_resto', 'ILIKE', "%$s%")->get();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, 'Failed');
         }
     }
@@ -72,7 +78,7 @@ class RestoController extends Controller
         $resto = Resto::where('slug', $slug)->first();
         $data = Setting::where('id_resto', $resto->id)->first();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -87,7 +93,7 @@ class RestoController extends Controller
      */
     public function store(Request $request)
     {
-        try{
+        try {
             $resto = Resto::create([
                 'nama_pemilik' => $request->nama_pemilik,
                 'nama_resto' => $request->nama_resto,
@@ -101,12 +107,12 @@ class RestoController extends Controller
 
             $data = Resto::where('id', '=', $resto->id)->get();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, 'Failed');
         }
     }
@@ -120,7 +126,7 @@ class RestoController extends Controller
      */
     public function update(Request $request, $id)
     {
-        try{
+        try {
             $resto = Resto::where('id', $id)->update([
                 'nama_pemilik' => $request->nama_pemilik,
                 'nama_resto' => $request->nama_resto,
@@ -129,16 +135,44 @@ class RestoController extends Controller
                 'kota' => $request->kota,
                 'provinsi' => $request->provinsi,
                 'slug' => Str::slug($request->nama_resto),
+                'jumlah_meja' => $request->jumlah_meja,
             ]);
 
             $data = Resto::where('id', '=', $id)->first();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
+            return ApiFormatter::createApi(500, 'Failed', $error);
+        }
+    }
+
+    public function ubah_lisensi(Request $request, $id)
+    {
+        try {
+            $resto = Resto::find($id);
+            $user = User::where('id_resto', $id)->where('id_level', 2)->first();
+            if (isset($request->masa_trial)) {
+                $resto->update([
+                    'masa_trial' => $resto->masa_trial + $request->masa_trial
+                ]);
+            }
+
+            $user->update([
+                'id_lisence' => $request->id_lisence
+            ]);
+
+            $data = Resto::where('id', '=', $id)->first();
+
+            if ($data) {
+                return ApiFormatter::createApi(200, 'Success', $data);
+            } else {
+                return ApiFormatter::createApi(400, 'Failed');
+            }
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, 'Failed', $error);
         }
     }
@@ -148,7 +182,7 @@ class RestoController extends Controller
         $update = Resto::where('id', $resto->id)->update(['status_resto' => $request->status_resto]);
         $data = Resto::findOrFail($resto->id);
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -166,7 +200,7 @@ class RestoController extends Controller
         $resto = Resto::findOrFail($id);
         $data = $resto->delete();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success Destroy Data');
         } else {
             return ApiFormatter::createApi(400, 'Failed');

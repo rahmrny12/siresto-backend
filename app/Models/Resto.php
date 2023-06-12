@@ -20,22 +20,22 @@ class Resto extends Model
 
     public function meja()
     {
-        return $this->hasMany(Meja::class);   
+        return $this->hasMany(Meja::class);
     }
 
     public function order()
     {
-        return $this->hasMany(Order::class);   
+        return $this->hasMany(Order::class);
     }
 
     public function promo()
     {
-        return $this->hasMany(Promo::class);   
+        return $this->hasMany(Promo::class);
     }
 
-    public function user()
+    public function users()
     {
-        return $this->belongsTo(User::class, 'id_user');
+        return $this->hasMany(User::class, 'id_resto', 'id');
     }
 
     public function kategori_bisnis()

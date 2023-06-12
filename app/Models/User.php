@@ -16,7 +16,7 @@ class User extends Authenticatable
     protected $with = ['level', 'lisence'];
 
     protected $guarded = ['id'];
-    
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -34,6 +34,11 @@ class User extends Authenticatable
     public function lisence()
     {
         return $this->belongsTo(Lisence::class, 'id_lisence');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(Resto::class, 'id_resto', 'id');
     }
 
     public function getJWTIdentifier()

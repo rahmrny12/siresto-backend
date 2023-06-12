@@ -51,8 +51,10 @@ class PromoController extends Controller
         $data = Promo::where('id_resto', $resto->id)
             ->whereDate('tanggal_awal_promo', '<=', now())
             ->whereMonth('tanggal_awal_promo', '<=', now())
+            ->whereYear('tanggal_awal_promo', '<=', now())
             ->whereDate('tanggal_akhir_promo', '>=', now())
             ->whereMonth('tanggal_akhir_promo', '>=', now())
+            ->whereYear('tanggal_akhir_promo', '>=', now())
             ->orderByDesc('id')->get();
 
         if ($data) {
