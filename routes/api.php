@@ -48,6 +48,7 @@ Route::prefix('resto')->group(function () {
 // kategori-bisnis
 Route::apiResource('/kategori-bisnis', KategoriBisnisController::class)->except('show');
 Route::get('kategori-bisnis/all', [KategoriBisnisController::class, 'kategori_bisnis_all']);
+Route::get('kategori-bisnis/register', [KategoriBisnisController::class, 'kategori_bisnis_register']);
 Route::prefix('kategori-bisnis')->group(function () {
     Route::post('/insert-select', [KategoriBisnisController::class, 'insert_select']);
 });

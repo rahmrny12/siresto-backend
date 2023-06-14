@@ -98,15 +98,17 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $user = User::where('email', $request->email)->first();
-        $resto = Resto::find($user->id_resto);
+        if ($request->email != "superadmin") {
+            $user = User::where('email', $request->email)->first();
 
-        if ($user->id_level != 1) {
-            if ($resto->status_resto == 0) {
-                return ApiFormatter::createApi(400, 'Email Atau Password Salah', [
-                    'success' => false,
-                    'data' => null
-                ]);
+            if ($user->level->level != 'Superadmin') {
+                $resto = Resto::find($user->id_resto);
+                if ($resto->status_resto == 0) {
+                    return ApiFormatter::createApi(400, 'Email Atau Password Salah', [
+                        'success' => false,
+                        'data' => null
+                    ]);
+                }
             }
         }
 
@@ -132,9 +134,8 @@ class AuthController extends Controller
         $success['token'] = auth()->user()->createToken('ewq98gegfNNn77j30u8PwL6sGFhj6aTXRcvrVFNq')->accessToken;
         $success['name'] = $auth->name;
         $success['username'] = $auth->username;
-        $success['gambar'] = $auth->gambar;
         $success['level'] = $auth->level->level;
-        if ($auth->id_level != '1') {
+        if ($auth->level->level != 'Superadmin') {
             $success['lisence'] = $lisence;
             $success['created_at'] = $resto->created_at;
             $success['masa_trial'] = $resto->masa_trial;

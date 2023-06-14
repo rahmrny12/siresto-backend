@@ -31,7 +31,18 @@ class KategoriBisnisController extends Controller
         $result = $query->paginate($perPage);
         $data = $result;
 
-        if($data) {
+        if ($data) {
+            return ApiFormatter::createApi(200, 'Success', $data);
+        } else {
+            return ApiFormatter::createApi(400, 'Failed');
+        }
+    }
+
+    public function kategori_bisnis_register()
+    {
+        $data = KategoriBisnis::all();
+
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -46,54 +57,54 @@ class KategoriBisnisController extends Controller
      */
     public function store(Request $request)
     {
-        try{
+        try {
             $kategori_bisnis = KategoriBisnis::create([
                 'kategori_bisnis' => $request->kategori_bisnis,
             ]);
 
             $data = KategoriBisnis::where('id', '=', $kategori_bisnis->id)->first();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, 'Failed');
         }
     }
 
     public function insert_select(Request $request)
     {
-        try{
+        try {
             $kategori_bisnis = KategoriBisnis::create([
                 'kategori_bisnis' => $request->kategori_bisnis,
             ]);
 
             $data = KategoriBisnis::select('id as value', 'kategori_bisnis as label')->where('id', '=', $kategori_bisnis->id)->get();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, 'Failed');
         }
     }
 
     public function kategori_bisnis_all(Request $request)
     {
-        try{
+        try {
             $s = $request->s;
             $data = KategoriBisnis::select('id as value', 'kategori_bisnis as label')->where('kategori_bisnis', 'ILIKE', "%$s%")->get();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, 'Failed');
         }
     }
@@ -107,19 +118,19 @@ class KategoriBisnisController extends Controller
      */
     public function update(Request $request, $id)
     {
-        try{
+        try {
             $kategori_bisnis = KategoriBisnis::where('id', $id)->update([
                 'kategori_bisnis' => $request->kategori_bisnis,
             ]);
 
             $data = KategoriBisnis::where('id', '=', $id)->first();
 
-            if($data) {
+            if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
             } else {
                 return ApiFormatter::createApi(400, 'Failed');
             }
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             return ApiFormatter::createApi(500, 'Failed');
         }
     }
@@ -135,7 +146,7 @@ class KategoriBisnisController extends Controller
         $kategori_bisnis = KategoriBisnis::findOrFail($id);
         $data = $kategori_bisnis->delete();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success Destroy Data');
         } else {
             return ApiFormatter::createApi(400, 'Failed');
