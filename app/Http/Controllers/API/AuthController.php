@@ -98,17 +98,15 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        if ($request->email != "superadmin") {
-            $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
-            if ($user->level->level != 'Superadmin') {
-                $resto = Resto::find($user->id_resto);
-                if ($resto->status_resto == 0) {
-                    return ApiFormatter::createApi(400, 'Email Atau Password Salah', [
-                        'success' => false,
-                        'data' => null
-                    ]);
-                }
+        if ($user->level->level != 'Superadmin') {
+            $resto = Resto::find($user->id_resto);
+            if ($resto->status_resto == 0) {
+                return ApiFormatter::createApi(400, 'Email Atau Password Salah', [
+                    'success' => false,
+                    'data' => null
+                ]);
             }
         }
 

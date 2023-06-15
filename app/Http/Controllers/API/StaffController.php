@@ -17,7 +17,7 @@ class StaffController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    {   
+    {
         $query = User::query()->whereNotIn('id_level', [1, 2]);
 
         if ($s = $request->input('s')) {
@@ -34,7 +34,7 @@ class StaffController extends Controller
         $result = $query->paginate($perPage);
         $data = $result;
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -50,9 +50,9 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         $gambar = '';
-        if($request->gambar) {
-            $gambar = time().'.' . explode('/', explode(':', substr($request->gambar, 0, strpos($request->gambar, ';')))[1])[1];
-            \Image::make($request->gambar)->save(public_path('images/user/').$gambar);
+        if ($request->gambar) {
+            $gambar = time() . '.' . explode('/', explode(':', substr($request->gambar, 0, strpos($request->gambar, ';')))[1])[1];
+            \Image::make($request->gambar)->save(public_path('images/user/') . $gambar);
             $gambar = 'images/user/' . $gambar;
         }
 
@@ -73,7 +73,7 @@ class StaffController extends Controller
 
         $data = User::where('id', $staff->id)->first();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -90,10 +90,10 @@ class StaffController extends Controller
     {
         $gambar = '';
         $user = User::findOrFail($id);
-        if($request->gambar) {
-            @unlink('images/user/'. $user->gambar);
-            $gambar = time().'.' . explode('/', explode(':', substr($request->gambar, 0, strpos($request->gambar, ';')))[1])[1];
-            \Image::make($request->gambar)->save(public_path('images/user/').$gambar);
+        if ($request->gambar) {
+            @unlink('images/user/' . $user->gambar);
+            $gambar = time() . '.' . explode('/', explode(':', substr($request->gambar, 0, strpos($request->gambar, ';')))[1])[1];
+            \Image::make($request->gambar)->save(public_path('images/user/') . $gambar);
             $gambar = 'images/user/' . $gambar;
         } else {
             $user = User::where('id', $id)->first();
@@ -106,7 +106,8 @@ class StaffController extends Controller
             'email' => $request->email,
             'gambar' => $gambar,
             'username' => $request->username,
-            'password' => $request->password,
+            'password' => bcrypt($request->password),
+            'password_asli' => $request->password,
             'no_telepon' => $request->no_telepon,
             'alamat_lengkap' => $request->alamat_lengkap,
             'id_resto' => $id_resto,
@@ -116,7 +117,7 @@ class StaffController extends Controller
 
         $data = User::where('id', $id)->first();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -126,7 +127,7 @@ class StaffController extends Controller
     public function show($id)
     {
         $data = User::where('id', '=', $id)->first();
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
@@ -145,11 +146,11 @@ class StaffController extends Controller
 
         $data = User::where('id', $id_staff)->first();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
-        }        
+        }
     }
 
     public function ubah_profile(Request $request, $id)
@@ -157,10 +158,10 @@ class StaffController extends Controller
         $staff = User::where('id', '=', $id)->first();
 
         $gambar = '';
-        if($request->gambar) {
-            $gambar = time().'.' . explode('/', explode(':', substr($request->gambar, 0, strpos($request->gambar, ';')))[1])[1];
+        if ($request->gambar) {
+            $gambar = time() . '.' . explode('/', explode(':', substr($request->gambar, 0, strpos($request->gambar, ';')))[1])[1];
 
-            \Image::make($request->gambar)->save(public_path('images/user/').$gambar);
+            \Image::make($request->gambar)->save(public_path('images/user/') . $gambar);
         } else {
             $gambar = $staff->gambar;
         }
@@ -179,11 +180,11 @@ class StaffController extends Controller
 
         $data = User::where('id', '=', $id)->first();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
-        }        
+        }
     }
 
     /**
@@ -192,14 +193,14 @@ class StaffController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    
+
     public function destroy($id)
     {
         $staff = User::findOrFail($id);
-        @unlink('images/user/'. $staff->gambar);
+        @unlink('images/user/' . $staff->gambar);
         $data = $staff->delete();
 
-        if($data) {
+        if ($data) {
             return ApiFormatter::createApi(200, 'Success Destroy Data');
         } else {
             return ApiFormatter::createApi(400, 'Failed');

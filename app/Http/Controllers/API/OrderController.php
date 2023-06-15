@@ -25,7 +25,7 @@ class OrderController extends Controller
         $query = Order::query();
         $id_resto = request()->user()->id_resto;
 
-        $query->where('id_resto', $id_resto);
+        $query->where('id_resto', $id_resto)->whereNotIn('status_order', ['closed']);
         if ($s = request()->input('s')) {
             $query->where('no_transaksi', 'ILIKE', "%$s%");
         }

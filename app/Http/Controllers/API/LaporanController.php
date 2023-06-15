@@ -20,6 +20,7 @@ class LaporanController extends Controller
 
         $order = Order::whereBetween('created_at', [$tanggal_awal, $tanggal_akhir])
             ->where('id_resto', auth()->user()->id_resto)
+            ->where('status_order', 'closed')
             ->get();
 
         if ($order) {
@@ -36,6 +37,7 @@ class LaporanController extends Controller
 
         $order = Order::whereBetween('created_at', [$tanggal_awal, $tanggal_akhir])
             ->where('id_resto', auth()->user()->id_resto)
+            ->where('status_order', 'closed')
             ->get();
 
         $penjualan_bersih = 0;
