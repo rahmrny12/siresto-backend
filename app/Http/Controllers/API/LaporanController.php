@@ -19,12 +19,14 @@ class LaporanController extends Controller
         $tanggal_akhir = date('Y-m-d H:i:s', strtotime(request('tanggal-akhir')));
 
         $order = Order::whereBetween('created_at', [$tanggal_awal, $tanggal_akhir])
-            ->where('id_resto', auth()->user()->id_resto)
-            ->where('status_order', 'closed')
-            ->get();
+            ->where('id_resto', auth()->user()->id_resto);
+
+        if (request('status-order') != null) {
+            $order = $order->where('status_order', request('status-order'));
+        }
 
         if ($order) {
-            return ApiFormatter::createApi(200, 'php', $order);
+            return ApiFormatter::createApi(200, 'php', $order->get());
         } else {
             return ApiFormatter::createApi(400, 'Failed');
         }
