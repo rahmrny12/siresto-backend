@@ -20,6 +20,7 @@ use App\Http\Controllers\API\MejaController;
 use App\Http\Controllers\API\PembayaranController;
 use App\Http\Controllers\API\MenuController;
 use App\Http\Controllers\API\ResetPasswordController;
+use App\Http\Controllers\API\sendOTPController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +53,10 @@ Route::get('kategori-bisnis/register', [KategoriBisnisController::class, 'katego
 Route::prefix('kategori-bisnis')->group(function () {
     Route::post('/insert-select', [KategoriBisnisController::class, 'insert_select']);
 });
+
+// Kode otp untuk pesanan online menu
+Route::post('sendOTP', [sendOTPController::class, 'sendOTP']);
+Route::post('cekOTP', [sendOTPController::class, 'cekOTP']);
 
 // kategori-produk
 Route::apiResource('/kategori-produk', KategoriProdukController::class)->except('show')->middleware('auth:api');

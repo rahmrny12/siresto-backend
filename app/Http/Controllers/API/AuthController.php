@@ -131,6 +131,7 @@ class AuthController extends Controller
 
         $success['token'] = auth()->user()->createToken('ewq98gegfNNn77j30u8PwL6sGFhj6aTXRcvrVFNq')->accessToken;
         $success['name'] = $auth->name;
+        $success['gambar'] = $auth->gambar;
         $success['username'] = $auth->username;
         $success['level'] = $auth->level->level;
         if ($auth->level->level != 'Superadmin') {

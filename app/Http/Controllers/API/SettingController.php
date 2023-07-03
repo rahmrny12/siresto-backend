@@ -138,7 +138,7 @@ class SettingController extends Controller
             \Image::make($request->gambar)->save(public_path('images/user/') . $gambar);
             $gambar = 'images/user/' . $gambar;
         } else {
-            $gambar = $user->gambar;
+            $gambar = null;
         }
 
         $id_resto = $user->id_resto;
