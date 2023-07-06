@@ -26,6 +26,11 @@ class OrderController extends Controller
         $id_resto = request()->user()->id_resto;
 
         $query->where('id_resto', $id_resto)->whereNotIn('status_order', ['closed']);
+
+        if (request()->user()->id_level === 3) {
+            $query->where('id_staff', request()->user()->id);
+        }
+
         if ($s = request()->input('s')) {
             $query->where('no_transaksi', 'ILIKE', "%$s%");
         }
@@ -80,6 +85,7 @@ class OrderController extends Controller
             'status_order' => 'in_progress',
             'status_bayar' => 'already_paid',
             'uuid' => Str::uuid(),
+            'id_staff' => $user->id_level == 3 ? $user->id : null
         ]);
 
         $id_order = $order->id;

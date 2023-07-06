@@ -14,6 +14,7 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 use App\Models\User;
 use App\Models\Resto;
+use App\Models\Setting;
 
 class AuthController extends Controller
 {
@@ -77,6 +78,17 @@ class AuthController extends Controller
             'alamat_lengkap' => '',
             'product_id' => request('product_id'),
         ];
+
+        $data = [
+            'id_resto' => $id_resto,
+            'status_pajak' => 0,
+            'pajak' => 0,
+            'status_charge_service' => 0,
+            'charge_service' => 0,
+            'alur_pembayaran_konsumen' => 'bayar_langsung'
+        ];
+
+        Setting::create($data);
 
         $add_user = User::create($user);
 

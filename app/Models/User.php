@@ -46,6 +46,11 @@ class User extends Authenticatable
         return $this->getKey();
     }
 
+    public function order()
+    {
+        return $this->hasMany(Order::class, 'id_staff', 'id');
+    }
+
     public function getJWTCustomClaims()
     {
         return [];

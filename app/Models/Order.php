@@ -67,4 +67,9 @@ class Order extends Model
             return null;
         }
     }
+
+    public function staff()
+    {
+        return $this->belongsTo(User::class, 'id_staff', 'id');
+    }
 }
