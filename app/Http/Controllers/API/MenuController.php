@@ -57,7 +57,10 @@ class MenuController extends Controller
         $no_transaksi = $request->no_transaksi;
         $resto = Resto::where('slug', $request->branch)->firstOrFail();
         $pelanggan = Pelanggan::create(['no_telepon' => $request->no_telepon, 'nama_pelanggan' => $request->nama_pelanggan, 'id_resto' => $resto->id]);
-        $meja = Meja::where('no_meja', $request->meja)->where('id_resto', $resto->id)->first();
+        $meja = null;
+        if ($request->meja != 'null') {
+            $meja = Meja::where('no_meja', $request->meja)->where('id_resto', $resto->id)->first();
+        }
         $cek_order = Order::where('no_transaksi', $no_transaksi)->first();
 
         if ($no_transaksi === 0 || $cek_order->status_order == "closed") {
@@ -69,9 +72,11 @@ class MenuController extends Controller
                 'bayar' => 0,
                 'kembali' => 0,
                 'nama_pelanggan' => $request->nama_pelanggan,
+                'no_telepon' => $request->no_telepon,
+                'alamat' => $request->alamat,
                 'id_pelanggan' => $pelanggan->id,
                 'id_resto' => $resto->id,
-                'id_meja' => $meja->id,
+                'id_meja' => $meja != null ? $meja->id : null,
                 'diskon' => $request->diskon,
                 'metode_pembayaran' => '',
                 'status_order' => 'open',

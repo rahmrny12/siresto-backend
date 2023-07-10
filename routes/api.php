@@ -21,6 +21,7 @@ use App\Http\Controllers\API\PembayaranController;
 use App\Http\Controllers\API\MenuController;
 use App\Http\Controllers\API\ResetPasswordController;
 use App\Http\Controllers\API\sendOTPController;
+use App\Http\Controllers\API\UserGuestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,8 +56,8 @@ Route::prefix('kategori-bisnis')->group(function () {
 });
 
 // Kode otp untuk pesanan online menu
-Route::post('sendOTP', [sendOTPController::class, 'sendOTP']);
-Route::post('cekOTP', [sendOTPController::class, 'cekOTP']);
+Route::post('sendotp', [sendOTPController::class, 'sendOTP']);
+Route::post('cekotp', [sendOTPController::class, 'cekOTP']);
 
 // kategori-produk
 Route::apiResource('/kategori-produk', KategoriProdukController::class)->except('show')->middleware('auth:api');
@@ -126,6 +127,9 @@ Route::prefix('dashboard')->group(function () {
 });
 
 // frontend
+Route::post('menu/login', [UserGuestController::class, 'login_menu']);
+Route::put('menu/user-guest/update', [UserGuestController::class, 'update']);
+Route::put('menu/user-guest/update-alamat', [UserGuestController::class, 'update_alamat']);
 Route::post('pembayaran', [PembayaranController::class, 'store']);
 Route::get('menu/cek-pelanggan', [MenuController::class, 'cek_pelanggan']);
 Route::post('menu/simpan-order-pelanggan', [MenuController::class, 'simpan_order_pelanggan']);
