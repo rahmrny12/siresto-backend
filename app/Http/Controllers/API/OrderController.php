@@ -35,12 +35,8 @@ class OrderController extends Controller
             $query->where('no_transaksi', 'ILIKE', "%$s%");
         }
 
-        if ($sort = request()->input('sort')) {
-            $query->orderBy('id', $sort);
-        }
-
         $perPage = request()->limit;
-        $result = $query->paginate($perPage);
+        $result = $query->orderBy('id', 'asc')->paginate($perPage);
         $data = $result;
 
         if ($data) {
