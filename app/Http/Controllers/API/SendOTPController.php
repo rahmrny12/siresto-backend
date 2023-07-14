@@ -9,11 +9,20 @@ use App\Models\VerifikasiOTP;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
 
 class SendOTPController extends Controller
 {
     public function sendOTP(Request $request)
     {
+        $validator = Validator::make(request()->all(), [
+            'phone_number' => 'required|unique:user_guests,no_hp',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiFormatter::createApi(400, 'failed');
+        }
+
         $result = Http::post('https://dev.api.awandigital.id/api/user-guest-available', [
             'email' => $request->email,
             'username' => $request->username,
