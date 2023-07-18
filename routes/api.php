@@ -20,7 +20,7 @@ use App\Http\Controllers\API\MejaController;
 use App\Http\Controllers\API\PembayaranController;
 use App\Http\Controllers\API\MenuController;
 use App\Http\Controllers\API\ResetPasswordController;
-use App\Http\Controllers\API\sendOTPController;
+use App\Http\Controllers\API\SendOTPController;
 use App\Http\Controllers\API\UserGuestController;
 
 /*
