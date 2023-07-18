@@ -16,20 +16,12 @@ class SendOTPController extends Controller
     public function sendOTP(Request $request)
     {
         $validator = Validator::make(request()->all(), [
+            'email' => 'required|unique:user_guests,email',
             'phone_number' => 'required|unique:user_guests,no_hp',
         ]);
 
         if ($validator->fails()) {
             return ApiFormatter::createApi(400, 'failed');
-        }
-
-        $result = Http::post('https://api.awandigital.id/api/user-guest-available', [
-            'email' => $request->email,
-            'username' => $request->username,
-        ])->json();
-
-        if (!empty($result)) {
-            return ApiFormatter::createApi(400, '');
         }
 
         $otpData = VerifikasiOTP::generateUniqueCode();
