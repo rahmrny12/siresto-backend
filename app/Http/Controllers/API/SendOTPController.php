@@ -23,7 +23,7 @@ class SendOTPController extends Controller
             return ApiFormatter::createApi(400, 'failed');
         }
 
-        $result = Http::post('https://dev.api.awandigital.id/api/user-guest-available', [
+        $result = Http::post('https://api.awandigital.id/api/user-guest-available', [
             'email' => $request->email,
             'username' => $request->username,
         ])->json();
@@ -64,7 +64,7 @@ class SendOTPController extends Controller
 
         $result = '';
         if (!empty($data)) {
-            $result = Http::post('https://dev.api.awandigital.id/api/user-guest/store', [
+            $result = Http::post('https://api.awandigital.id/api/user-guest/store', [
                 'nama' => $request->nama,
                 'no_hp' => $request->no_whatsapp,
                 'username' => $request->username,
