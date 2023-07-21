@@ -79,7 +79,7 @@ class MenuController extends Controller
                 'id_meja' => $meja != null ? $meja->id : null,
                 'diskon' => $request->diskon,
                 'metode_pembayaran' => '',
-                'status_order' => 'open',
+                'status_order' => $request->source == 'qrcode' ? 'open' : 'draft',
                 'status_bayar' => 'not_paid',
                 'pajak' => $request->pajak,
                 'service_charge' => $request->service_charge,
