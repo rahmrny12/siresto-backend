@@ -128,6 +128,8 @@ Route::prefix('dashboard')->group(function () {
 
 // frontend
 Route::post('menu/login', [UserGuestController::class, 'login_menu']);
+Route::post('menu/forgot-password', [UserGuestController::class, 'forgot_password']);
+Route::post('menu/reset-password', [UserGuestController::class, 'reset_password']);
 Route::put('menu/user-guest/update', [UserGuestController::class, 'update']);
 Route::put('menu/user-guest/update-alamat', [UserGuestController::class, 'update_alamat']);
 Route::post('pembayaran', [PembayaranController::class, 'store']);
