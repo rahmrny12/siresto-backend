@@ -109,23 +109,24 @@ class SettingController extends Controller
         return ApiFormatter::createApi(200, 'Success', $data);
     }
 
-    public function reset_password(Request $request)
+    public function update_password(Request $request)
     {
-        $user = $request->user();
-        $id_user = $user->id;
-
-        $user = User::where('id', $id_user)->update([
-            'password' => Hash::make($request->password_baru),
-            'password_asli' => $request->password_baru,
+        $validated = $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required',
+            'new_password_confirmation' => 'same:new_password'
         ]);
 
-        $data = User::where('id', $id_user)->first();
-
-        if ($data) {
-            return ApiFormatter::createApi(200, 'Success', $data);
-        } else {
-            return ApiFormatter::createApi(400, 'Failed');
+        if (!Hash::check($request->current_password, auth()->user()->password)) {
+            return response()->json(['message' => 'The password is incorrect.'], 400);
         }
+
+        User::find(auth()->user()->id)->update([
+            'password' => Hash::make($validated['new_password']),
+            'password_asli' => $validated['new_password'],
+        ]);
+
+        return ApiFormatter::createApi(200, 'Success');
     }
 
     public function ubah_profile(Request $request)

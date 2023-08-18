@@ -116,7 +116,7 @@ Route::prefix('setting')->group(function () {
     Route::put('/profile', [SettingController::class, 'profile'])->middleware('auth:api');
     Route::get('/profile', [SettingController::class, 'get_profile'])->middleware('auth:api');
     Route::get('/profile-user', [SettingController::class, 'profile_user'])->middleware('auth:api');
-    Route::patch('/reset-password', [SettingController::class, 'reset_password'])->middleware('auth:api');
+    Route::patch('/update-password', [SettingController::class, 'update_password'])->middleware('auth:api');
     Route::patch('/ubah-profile', [SettingController::class, 'ubah_profile'])->middleware('auth:api');
 });
 
@@ -141,7 +141,6 @@ Route::get('menu/cari-order-transaksi', [MenuController::class, 'cari_order_tran
 Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
-    Route::post('reset_password', [ResetPasswordController::class, 'reset_password']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('me', [AuthController::class, 'me']);
