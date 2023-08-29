@@ -34,8 +34,8 @@ class AuthController extends Controller
             'email' => 'required',
             'name' => 'required',
             'password' => 'required',
-            'businessName' => 'required',
-            'businessCategory' => 'required',
+            'business_name' => 'required',
+            'business_category' => 'required',
             'phone' => 'required',
             'province' => 'required',
             'city' => 'required',
@@ -52,14 +52,14 @@ class AuthController extends Controller
 
         $resto = [
             'nama_pemilik' => request('name'),
-            'nama_resto' => request('businessName'),
+            'nama_resto' => request('business_name'),
             'id_kategori_bisnis' => 0,
             'nomor_telepon' => request('phone'),
             'kota' => request('city'),
             'provinsi' => request('province'),
             'email' => request('email'),
-            'kategori_bisnis' => request('businessCategory'),
-            'slug' => Str::slug(request('businessName')),
+            'kategori_bisnis' => request('business_category'),
+            'slug' => Str::slug(request('business_name')),
             'status_resto' => 1,
         ];
 
