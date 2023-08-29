@@ -88,7 +88,7 @@ class StaffController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $gambar = '';
+        $gambar = null;
         $user = User::findOrFail($id);
         if ($request->gambar) {
             @unlink('images/user/' . $user->gambar);
@@ -157,7 +157,7 @@ class StaffController extends Controller
     {
         $staff = User::where('id', '=', $id)->first();
 
-        $gambar = '';
+        $gambar = null;
         if ($request->gambar) {
             $gambar = time() . '.' . explode('/', explode(':', substr($request->gambar, 0, strpos($request->gambar, ';')))[1])[1];
 

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
+use App\Models\KategoriBisnis;
 use Illuminate\Support\Facades\Validator;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -50,10 +51,11 @@ class AuthController extends Controller
             ]);
         }
 
+        $kategori_bisnis = KategoriBisnis::where('kategori_bisnis', request('business_category'))->first();
         $resto = [
             'nama_pemilik' => request('name'),
             'nama_resto' => request('business_name'),
-            'id_kategori_bisnis' => 0,
+            'id_kategori_bisnis' => $kategori_bisnis->id,
             'nomor_telepon' => request('phone'),
             'kota' => request('city'),
             'provinsi' => request('province'),
@@ -110,9 +112,12 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $user = User::where('email', $request->email)->first();
+        $request->validate(['email' => 'required']);
 
-        if ($user->level->level != 'Superadmin') {
+        $fieldType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $user = User::where($fieldType, $request->email)->first();
+
+        if ($user && $user->level->level != 'Superadmin') {
             $resto = Resto::find($user->id_resto);
             if ($resto->status_resto == 0) {
                 return ApiFormatter::createApi(400, 'Email Atau Password Salah', [
@@ -122,14 +127,15 @@ class AuthController extends Controller
             }
         }
 
-        $fieldType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-        $request->validate(['email' => 'required', 'password' => 'required']);
-
-        if (!auth()->attempt([$fieldType => $request->email, 'password' => $request->password])) {
-            return ApiFormatter::createApi(400, 'Email Atau Password Salah', [
-                'success' => false,
-                'data' => null
-            ]);
+        if ($user->level->level == 'Staff') {
+            if (!auth()->attempt([$fieldType => $request->email, 'password' => $request->password])) {
+                return ApiFormatter::createApi(400, 'Email Atau Password Salah', [
+                    'success' => false,
+                    'data' => null
+                ]);
+            }
+        } else {
+            auth()->login($user);
         }
 
         $auth = auth()->user();
