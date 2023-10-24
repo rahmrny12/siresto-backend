@@ -22,6 +22,7 @@ use App\Http\Controllers\API\MenuController;
 use App\Http\Controllers\API\ResetPasswordController;
 use App\Http\Controllers\API\SendOTPController;
 use App\Http\Controllers\API\UserGuestController;
+use App\Http\Controllers\API\SupplierController;
 
 /*
 |--------------------------------------------------------------------------
@@ -96,6 +97,10 @@ Route::prefix('order')->group(function () {
 Route::prefix('laporan')->group(function () {
     Route::get('/laporan-penjualan', [LaporanController::class, 'laporan_penjualan'])->middleware('auth:api');
     Route::get('/laporan-pendapatan', [LaporanController::class, 'laporan_pendapatan'])->middleware('auth:api');
+    Route::get('/stok', [LaporanController::class, 'stok'])->middleware('auth:api');
+    Route::get('/mutasi-stok', [LaporanController::class, 'mutasi_stok'])->middleware('auth:api');
+    Route::get('/stok-opname', [LaporanController::class, 'laporan_stok_opname'])->middleware('auth:api');
+    Route::post('/simpan-stok-opname', [LaporanController::class, 'simpan_stok_opname'])->middleware('auth:api');
 });
 
 // promo
@@ -145,3 +150,8 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('me', [AuthController::class, 'me']);
 });
+
+// supplier
+Route::apiResource('supplier', SupplierController::class)->except('show')->middleware('auth:api');
+Route::get('stok/supplier/all', [SupplierController::class, 'supplier_all'])->middleware('auth:api');
+Route::post('stok/stok-masuk', [ProdukController::class, 'stok_masuk'])->middleware('auth:api');

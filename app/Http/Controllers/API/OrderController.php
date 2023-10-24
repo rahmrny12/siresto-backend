@@ -66,62 +66,73 @@ class OrderController extends Controller
     {
         $user = $request->user();
         $id_resto = $user->id_resto;
-        $order = Order::create([
-            'no_transaksi' => $this->no_transaksi(),
-            'nilai_transaksi' => $request->total_semua,
-            'bayar' => $request->pembayaran,
-            'kembali' => $request->kembalian,
-            'nama_pelanggan' => $request->nama_pelanggan,
-            'id_resto' => $id_resto,
-            'id_meja' => $request->id_meja,
-            'pajak' => $request->pajak,
-            'service_charge' => $request->charge_service,
-            'diskon' => $request->diskon,
-            'metode_pembayaran' => $request->metode_pembayaran,
-            'status_order' => 'in_progress',
-            'status_bayar' => 'already_paid',
-            'uuid' => Str::uuid(),
-            'id_staff' => $user->id_level == 3 ? $user->id : null
-        ]);
 
-        $id_order = $order->id;
+        DB::beginTransaction();
 
-        $order_detail = [];
-        $total_semua_laba = 0;
-        foreach ($request->produk as $key => $produk) {
-            $produk_db = DB::table('produk')->where('id', $produk['id'])->first();
+        try {
+            $order = Order::create([
+                'no_transaksi' => $this->no_transaksi(),
+                'nilai_transaksi' => $request->total_semua,
+                'bayar' => $request->pembayaran,
+                'kembali' => $request->kembalian,
+                'nama_pelanggan' => $request->nama_pelanggan,
+                'id_resto' => $id_resto,
+                'id_meja' => $request->id_meja,
+                'pajak' => $request->pajak,
+                'service_charge' => $request->charge_service,
+                'diskon' => $request->diskon,
+                'metode_pembayaran' => $request->metode_pembayaran,
+                'status_order' => 'in_progress',
+                'status_bayar' => 'already_paid',
+                'uuid' => Str::uuid(),
+                'id_staff' => $user->id_level == 3 ? $user->id : null
+            ]);
 
-            $harga_jual = $produk_db->harga_jual;
-            $harga_awal = $produk_db->harga_awal;
-            $diskon = $produk_db->diskon;
-            $jumlah_produk = $produk['jumlah_produk'];
+            $id_order = $order->id;
 
-            $laba = ($harga_jual - $harga_awal) - $diskon;
-            $total_harga_jual = ($harga_jual - $diskon) * $jumlah_produk;
-            $total_laba = (($harga_jual - $diskon) - $harga_awal) * $jumlah_produk;
-            $total_semua_laba += (int) $total_laba;
+            $order_detail = [];
+            $total_semua_laba = 0;
+            foreach ($request->produk as $key => $produk) {
+                $produk_db = DB::table('produk')->where('id', $produk['id'])->first();
 
-            $order_detail[] = [
-                'id_order' => $id_order,
-                'id_produk' => $produk['id'],
-                'jumlah_beli' => $jumlah_produk,
-                'harga_jual' => $harga_jual,
-                'laba' => $laba,
-                'total_harga_jual' => $total_harga_jual,
-                'total_laba' => $total_laba,
-                'diskon' => $diskon,
-                'catatan' => $produk['catatan'],
-            ];
-        }
+                $harga_jual = $produk_db->harga_jual;
+                $harga_awal = $produk_db->harga_awal;
+                $diskon = $produk_db->diskon;
+                $jumlah_produk = $produk['jumlah_produk'];
 
-        Order::where('id', $id_order)->update(['nilai_laba' => $total_semua_laba]);
-        DB::table('order_detail')->insert($order_detail);
-        $data = Order::where('id', '=', $order->id)->get();
+                $laba = ($harga_jual - $harga_awal) - $diskon;
+                $total_harga_jual = ($harga_jual - $diskon) * $jumlah_produk;
+                $total_laba = (($harga_jual - $diskon) - $harga_awal) * $jumlah_produk;
+                $total_semua_laba += (int) $total_laba;
 
-        if ($data) {
+                $order_detail[] = [
+                    'id_order' => $id_order,
+                    'id_produk' => $produk['id'],
+                    'jumlah_beli' => $jumlah_produk,
+                    'harga_jual' => $harga_jual,
+                    'laba' => $laba,
+                    'total_harga_jual' => $total_harga_jual,
+                    'total_laba' => $total_laba,
+                    'diskon' => $diskon,
+                    'catatan' => $produk['catatan'],
+                ];
+
+                if ($jumlah_produk > $produk_db->stok)
+                {
+                    throw new Exception('Stock update failed');
+                }
+                DB::table('produk')->where('id', $produk['id'])->update(['stok' => $produk_db->stok - $jumlah_produk]);
+            }
+
+            Order::where('id', $id_order)->update(['nilai_laba' => $total_semua_laba]);
+            DB::table('order_detail')->insert($order_detail);
+            $data = Order::where('id', '=', $order->id)->get();
+
+            DB::commit();
             return ApiFormatter::createApi(200, 'Success', $data);
-        } else {
-            return ApiFormatter::createApi(400, 'Failed');
+        } catch (Exception $e) {
+            DB::rollback();
+            return ApiFormatter::createApi(400, 'Failed. ' . $e->getMessage());
         }
     }
 

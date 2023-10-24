@@ -7,10 +7,15 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Exception;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 use App\Models\Produk;
 use App\Models\Resto;
 use App\Models\Meja;
+use App\Models\FakturProduk;
+use App\Models\FakturProdukDetail;
+use App\Models\Supplier;
 
 class ProdukController extends Controller
 {
@@ -228,6 +233,61 @@ class ProdukController extends Controller
             return ApiFormatter::createApi(200, 'Success', $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
+        }
+    }
+
+    public function stok_masuk(Request $request)
+    {
+        $user = auth()->user();
+        $id_resto = $user->id_resto;
+
+        DB::beginTransaction();
+
+        try {
+            $faktur = FakturProduk::create([
+                'id_resto' => $id_resto,
+                'id_pegawai' => $user->id,
+                'id_supplier' => $request->id_supplier,
+                'tanggal' => Carbon::createFromFormat("Y-m-d H:i:s", NOW())->toDateString(),
+                'waktu' => Carbon::createFromFormat("Y-m-d H:i:s", NOW())->toTimeString(),
+            ]);
+
+            $id_faktur = $faktur->id_faktur;
+
+            $faktur_detail = [];
+
+            foreach ($request->produk as $key => $data) {
+                $produk = Produk::find($data['id_produk']);
+
+                if (!$produk)
+                {
+                    throw new Exception('Product not found');
+                }
+
+                $produk->update([
+                    'stok' => $produk->stok + $data['jumlah_stok'],
+                    'harga_awal' => $data['harga_beli'],
+                    'harga_jual' => $data['harga_jual'],
+                    'harga_diskon' => 0,
+                ]);
+
+                $faktur_detail[] = [
+                    'id_faktur' => $id_faktur,
+                    'id_produk' => $data['id_produk'],
+                    'jumlah_stok' => $data['jumlah_stok'],
+                    'harga_beli' => $data['harga_beli'],
+                    'harga_jual' => $data['harga_jual'],
+                ];
+            }
+
+            FakturProdukDetail::insert($faktur_detail);
+            $data = FakturProduk::find($id_faktur)->first();
+
+            DB::commit();
+            return ApiFormatter::createApi(200, 'Success', $data);
+        } catch (Exception $e) {
+            DB::rollback();
+            return ApiFormatter::createApi(400, 'Failed. ' . $e->getMessage() . ". Line : " . $e->getLine());
         }
     }
 }
