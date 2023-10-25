@@ -17,9 +17,9 @@ class SupplierController extends Controller
     public function index()
     {
         $query = Supplier::query();
-        $id_toko = auth()->user()->id_toko;
+        $id_resto = auth()->user()->id_resto;
 
-        $query->where('id_toko', $id_toko);
+        $query->where('id_resto', $id_resto);
         if ($s = request()->input('s')) {
             $query->where('supplier', 'ILIKE', '%' . $s . '%');
         }
@@ -49,13 +49,13 @@ class SupplierController extends Controller
     {
         try {
             $user = $request->user();
-            $id_toko = $user->id_toko;
+            $id_resto = $user->id_resto;
 
             $supplier = Supplier::create([
                 'nama_supplier' => $request->nama_supplier,
                 'alamat' => $request->alamat,
                 'no_whatsapp' => $request->no_whatsapp,
-                'id_toko' => $id_toko,
+                'id_resto' => $id_resto,
             ]);
 
             if ($supplier) {
@@ -95,7 +95,7 @@ class SupplierController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $id_toko = $request->user()->id_toko;
+            $id_resto = $request->user()->id_resto;
             $supplier = Supplier::where('id_supplier', $id)->update([
                 'nama_supplier' => $request->nama_supplier,
                 'alamat' => $request->alamat,
@@ -140,8 +140,8 @@ class SupplierController extends Controller
     {
         try {
             $s = $request->s;
-            $id_toko = auth()->user()->id_toko;
-            $data = Supplier::select('id_supplier as value', 'nama_supplier as label')->where('nama_supplier', 'ILIKE', "%$s%")->where('id_toko', $id_toko)->get();
+            $id_resto = auth()->user()->id_resto;
+            $data = Supplier::select('id_supplier as value', 'nama_supplier as label')->where('nama_supplier', 'ILIKE', "%$s%")->where('id_resto', $id_resto)->get();
 
             if ($data) {
                 return ApiFormatter::createApi(200, 'Success', $data);
