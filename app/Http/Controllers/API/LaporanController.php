@@ -153,7 +153,8 @@ class LaporanController extends Controller
 
         $data_stok = FakturProdukDetail::join('faktur', 'faktur.id_faktur', 'faktur_detail.id_faktur')
             ->leftJoin('supplier', 'supplier.id_supplier', 'faktur.id_supplier')
-            ->leftJoin('users', 'users.id', 'faktur.id_pegawai');
+            ->leftJoin('users', 'users.id', 'faktur.id_pegawai')
+            ->where('supplier.id_resto', auth()->user()->id_resto);
 
         if ($data_stok = $data_stok->get()) {
             return ApiFormatter::createApi(200, 'Success', $data_stok);
