@@ -222,14 +222,29 @@ class OrderController extends Controller
      */
     public function destroy($id)
     {
-        $order_detail = OrderDetail::where('id_order', $id)->delete();
-        $order = Order::findOrFail($id);
-        $data = $order->delete();
+        DB::beginTransaction();
 
-        if ($data) {
-            return ApiFormatter::createApi(200, 'Success Destroy Data');
-        } else {
-            return ApiFormatter::createApi(400, 'Failed');
+        try {
+            $order_detail = OrderDetail::where('id_order', $id);
+
+            foreach ($order_detail->get() as $value) {
+                $produk_db = DB::table('produk')->where('id', $value['id_produk'])->first();
+
+                if ($value['jumlah_beli'] > $produk_db->stok)
+                {
+                    throw new Exception('Stock update failed');
+                }
+                DB::table('produk')->where('id', $value['id_produk'])->update(['stok' => $produk_db->stok + $value['jumlah_beli']]);
+            }
+
+            $order_detail->delete();
+            $data = Order::findOrFail($id)->delete();
+
+            DB::commit();
+            return ApiFormatter::createApi(200, 'Success', $data);
+        } catch (Exception $e) {
+            DB::rollback();
+            return ApiFormatter::createApi(400, 'Failed. ' . $e->getMessage());
         }
     }
 }
