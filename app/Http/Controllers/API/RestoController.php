@@ -35,10 +35,9 @@ class RestoController extends Controller
 
         $perPage = request()->limit;
         $result = $query
-            ->with('users')
-            ->whereHas('users', function ($query) {
-                $query->where('id_level', '2');
-            })
+            ->with(['users' => function ($query) {
+                $query->where('id_level', 2);
+            }])
             ->paginate($perPage);
         $data = $result;
 
