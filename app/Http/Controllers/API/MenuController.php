@@ -63,10 +63,20 @@ class MenuController extends Controller
             $meja = Meja::where('no_meja', $request->meja)->where('id_resto', $resto->id)->first();
         }
         $cek_order = Order::where('no_transaksi', $no_transaksi)->first();
+        $order = null;
+        $isClosed = false;
+        if($no_transaksi !== 0){
+            $order = Order::where('id_meja', $meja->id)->where('id_resto', $resto->id)->latest()->first();
+            $isClosed = $order->status_order == 'closed';
+        }
 
         DB::beginTransaction();
 
         try {
+            if(!$isClosed && $order && $order->no_telepon != $request->no_telepon) {
+                throw new \Exception('sedang ada pelanggan');
+            }
+            
             if ($no_transaksi === 0 || $cek_order->status_order == "closed") {
                 $order = Order::create([
                     'no_transaksi' => $this->no_transaksi(),

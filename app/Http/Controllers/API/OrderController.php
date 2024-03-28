@@ -28,7 +28,11 @@ class OrderController extends Controller
         $query->where('id_resto', $id_resto)->whereNotIn('status_order', ['closed']);
 
         if (request()->user()->id_level === 3) {
-            $query->where('id_staff', request()->user()->id);
+            $query->where(function ($query) {
+                $query->where('id_staff', request()->user()->id)
+                    ->orWhere('source', 'Online Pick-Up')
+                    ->orWhere('source', 'qrcode');
+            });
         }
 
         if ($s = request()->input('s')) {

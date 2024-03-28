@@ -72,6 +72,12 @@ class MejaController extends Controller
             return ApiFormatter::createApi(400, 'Meja Melebihi Batas');
         }
 
+        $duplikat = Meja::where('no_meja', $request->no_meja)->exists();
+
+        if ($duplikat) {
+            return ApiFormatter::createApi(400, 'Meja Duplikat');
+        }
+
         $meja = Meja::create([
             'no_meja' => $request->no_meja,
             'meja_tersedia' => 1,
