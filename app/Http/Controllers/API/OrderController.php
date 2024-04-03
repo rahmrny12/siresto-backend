@@ -207,6 +207,7 @@ class OrderController extends Controller
             'bayar' => $request->pembayaran,
             'kembali' => $request->kembalian,
             'status_bayar' => $request->status_bayar,
+            'id_staff' => $user->id_level == 3 ? $user->id : null
         ]);
 
         $data = Order::where('id', $order->id)->first();

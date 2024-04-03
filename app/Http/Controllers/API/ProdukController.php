@@ -16,6 +16,7 @@ use App\Models\Meja;
 use App\Models\FakturProduk;
 use App\Models\FakturProdukDetail;
 use App\Models\Supplier;
+use App\Models\Bahan;
 
 class ProdukController extends Controller
 {
@@ -266,9 +267,6 @@ class ProdukController extends Controller
 
                 $produk->update([
                     'stok' => $produk->stok + $data['jumlah_stok'],
-                    'harga_awal' => $data['harga_beli'],
-                    'harga_jual' => $data['harga_jual'],
-                    'harga_diskon' => 0,
                 ]);
 
                 $faktur_detail[] = [

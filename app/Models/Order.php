@@ -14,7 +14,7 @@ class Order extends Model
 
     protected $table = 'order';
     protected $guarded = ['id'];
-    protected $with = ['order_detail', 'meja'];
+    protected $with = ['order_detail', 'meja', 'staff'];
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

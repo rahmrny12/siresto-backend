@@ -9,6 +9,7 @@ use App\Http\Controllers\API\KategoriBisnisController;
 use App\Http\Controllers\API\KategoriProdukController;
 use App\Http\Controllers\API\LevelController;
 use App\Http\Controllers\API\ProdukController;
+use App\Http\Controllers\API\BahanController;
 use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\LaporanController;
 use App\Http\Controllers\API\PromoController;
@@ -76,6 +77,8 @@ Route::put('lisence/ubah/{id}', [RestoController::class, 'ubah_lisensi']);
 Route::apiResource('produk', ProdukController::class)->except('show')->middleware('auth:api');
 Route::put('produk/ubah-status/{produk}', [ProdukController::class, 'ubah_status'])->middleware('auth:api');
 Route::get('produk/produk-home', [ProdukController::class, 'produk_home']);
+
+Route::apiResource('bahan', BahanController::class)->except('show')->middleware('auth:api');
 
 
 // meja
