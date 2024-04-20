@@ -74,6 +74,12 @@ class OrderController extends Controller
         DB::beginTransaction();
 
         try {
+            $order = Order::where('id_meja', $request->id_meja)->where('id_resto', $id_resto)->latest()->first();
+
+            if ($order->status_order != 'closed') {
+                throw new \Exception('Sedang ada pelanggan');
+            }
+
             $order = Order::create([
                 'no_transaksi' => $this->no_transaksi(),
                 'nilai_transaksi' => $request->total_semua,
@@ -136,13 +142,13 @@ class OrderController extends Controller
             return ApiFormatter::createApi(200, 'Success', $data);
         } catch (Exception $e) {
             DB::rollback();
-            return ApiFormatter::createApi(400, 'Failed. ' . $e->getMessage());
+            return ApiFormatter::createApi(400, $e->getMessage());
         }
     }
 
     public function ubah_status_profile(Request $request, Order $order)
     {
-        $action = Order::where('id', $order->id)->update(['status_order' => $request->status]);
+        Order::where('id', $order->id)->update(['status_order' => $request->status]);
         $data = Order::where('id', $order->id)->first();
 
         if ($data) {

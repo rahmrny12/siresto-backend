@@ -92,7 +92,7 @@ Route::get('order/cari-order-transaksi', [OrderController::class, 'cari_order_by
 Route::post('order/simpan-order-konsumen', [OrderController::class, 'simpan_order_konsumen'])->middleware('auth:api');
 
 Route::prefix('order')->group(function () {
-    Route::patch('/ubah-status-order/{order}', [OrderController::class, 'ubah_status_profile']);
+    Route::put('/ubah-status-order/{order}', [OrderController::class, 'ubah_status_profile']);
     Route::get('/meja', [OrderController::class, 'meja'])->middleware('auth:api');
 });
 

@@ -47,19 +47,26 @@ class LaporanController extends Controller
             ->where('status_order', 'closed')
             ->get();
 
+        $penjualan_kotor = 0;
+        $total_diskon = 0;
         $penjualan_bersih = 0;
+        $laba_kotor = 0;
         $hpp = 0;
 
         foreach ($order as $key => $value) {
+            $laba_kotor += $value->nilai_laba;
+            $total_diskon += $value->diskon;
             $penjualan_bersih += $value->nilai_transaksi;
+
             foreach ($value->order_detail as $key => $order_detail) {
                 $hpp += $order_detail->produk->harga_awal * $order_detail->jumlah_beli;
+                $penjualan_kotor += $order_detail->total_harga_jual;
             }
         }
 
         $laba_bersih = $penjualan_bersih - $hpp;
 
-        return ApiFormatter::createApi(200, 'Success', ['penjualan_bersih' => $penjualan_bersih, 'hpp' => $hpp, 'laba_bersih' => $laba_bersih]);
+        return ApiFormatter::createApi(200, 'Success', ['penjualan_bersih' => $penjualan_bersih, 'hpp' => $hpp, 'laba_bersih' => $laba_bersih, 'penjualan_kotor' => $penjualan_kotor, 'total_diskon' => $total_diskon, 'laba_kotor' => $laba_kotor]);
     }
 
     public function stok(Request $request)
