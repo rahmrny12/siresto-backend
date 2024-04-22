@@ -241,11 +241,13 @@ class OrderController extends Controller
             foreach ($order_detail->get() as $value) {
                 $produk_db = DB::table('produk')->where('id', $value['id_produk'])->first();
 
-                if ($value['jumlah_beli'] > $produk_db->stok)
-                {
-                    throw new Exception('Stock update failed');
+                if ($produk_db != null) {
+                    if ($value['jumlah_beli'] > $produk_db->stok)
+                    {
+                        throw new Exception('Stock update failed');
+                    }
+                    DB::table('produk')->where('id', $value['id_produk'])->update(['stok' => $produk_db->stok + $value['jumlah_beli']]);
                 }
-                DB::table('produk')->where('id', $value['id_produk'])->update(['stok' => $produk_db->stok + $value['jumlah_beli']]);
             }
 
             $order_detail->delete();
