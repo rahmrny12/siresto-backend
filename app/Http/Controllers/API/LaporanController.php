@@ -57,10 +57,10 @@ class LaporanController extends Controller
             $laba_kotor += $value->nilai_laba;
             $total_diskon += $value->diskon;
             $penjualan_bersih += $value->nilai_transaksi;
+            $penjualan_kotor += $value->nilai_transaksi + $value->diskon;
 
             foreach ($value->order_detail as $key => $order_detail) {
                 $hpp += $order_detail->produk->harga_awal * $order_detail->jumlah_beli;
-                $penjualan_kotor += $order_detail->total_harga_jual;
             }
         }
 
