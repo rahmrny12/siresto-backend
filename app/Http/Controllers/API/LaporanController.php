@@ -52,12 +52,17 @@ class LaporanController extends Controller
         $penjualan_bersih = 0;
         $laba_kotor = 0;
         $hpp = 0;
+        $pajak = 0;
+        $service_charge = 0;
 
         foreach ($order as $key => $value) {
             $laba_kotor += $value->nilai_laba;
             $total_diskon += $value->diskon;
             $penjualan_bersih += $value->nilai_transaksi;
             $penjualan_kotor += $value->nilai_transaksi + $value->diskon;
+
+            $pajak += $value->pajak;
+            $service_charge += $value->service_charge;
 
             foreach ($value->order_detail as $key => $order_detail) {
                 $hpp += $order_detail->produk->harga_awal * $order_detail->jumlah_beli;
@@ -66,7 +71,7 @@ class LaporanController extends Controller
 
         $laba_bersih = $penjualan_bersih - $hpp;
 
-        return ApiFormatter::createApi(200, 'Success', ['penjualan_bersih' => $penjualan_bersih, 'hpp' => $hpp, 'laba_bersih' => $laba_bersih, 'penjualan_kotor' => $penjualan_kotor, 'total_diskon' => $total_diskon, 'laba_kotor' => $laba_kotor]);
+        return ApiFormatter::createApi(200, 'Success', ['penjualan_bersih' => $penjualan_bersih, 'hpp' => $hpp, 'laba_bersih' => $laba_bersih, 'penjualan_kotor' => $penjualan_kotor, 'total_diskon' => $total_diskon, 'laba_kotor' => $laba_kotor, 'pajak' => $pajak, 'service_charge' => $service_charge]);
     }
 
     public function stok(Request $request)
