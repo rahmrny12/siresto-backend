@@ -12,6 +12,7 @@ use Exception;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Meja;
+use App\Models\Resto;
 
 class OrderController extends Controller
 {
@@ -24,6 +25,7 @@ class OrderController extends Controller
     {
         $query = Order::query();
         $id_resto = request()->user()->id_resto;
+        $resto = Resto::find($id_resto);
 
         $query->where('id_resto', $id_resto)->whereNotIn('status_order', ['closed']);
 
@@ -44,7 +46,14 @@ class OrderController extends Controller
         $data = $result;
 
         if ($data) {
-            return ApiFormatter::createApi(200, 'Success', $data);
+            return response()->json([
+                'meta' => [
+                    'code' => 200,
+                    'message' => 'success'
+                ],
+                'data' => $data,
+                'print_2x' => $resto->print_2x
+            ]);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
         }
