@@ -33,7 +33,8 @@ class OrderController extends Controller
             $query->where(function ($query) {
                 $query->where('id_staff', request()->user()->id)
                     ->orWhere('source', 'Online Pick-Up')
-                    ->orWhere('source', 'qrcode');
+                    ->orWhere('source', 'qrcode')
+                    ->orWhere('source', 'resto');
             });
         }
 
@@ -83,9 +84,12 @@ class OrderController extends Controller
         DB::beginTransaction();
 
         try {
-            $order = Order::where('id_meja', $request->id_meja)->where('id_resto', $id_resto)->latest()->first();
+            $order = null;
+            if($request->id_meja) {
+                $order = Order::where('id_meja', $request->id_meja)->where('id_resto', $id_resto)->latest()->first();
+            }
 
-            if ($order->status_order != 'closed') {
+            if ($order && $order->status_order != 'closed') {
                 throw new \Exception('Sedang ada pelanggan');
             }
 
