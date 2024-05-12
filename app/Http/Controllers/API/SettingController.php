@@ -126,7 +126,6 @@ class SettingController extends Controller
 
         User::find(auth()->user()->id)->update([
             'password' => Hash::make($validated['new_password']),
-            'password_asli' => $validated['new_password'],
         ]);
 
         return ApiFormatter::createApi(200, 'Success');

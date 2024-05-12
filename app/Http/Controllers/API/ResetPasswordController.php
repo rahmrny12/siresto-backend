@@ -29,7 +29,6 @@ class ResetPasswordController extends Controller
 
         $success = $user->update([
             'password' => bcrypt(request('password')),
-            'password_asli' => request('password'),
         ]);
 
         return ApiFormatter::createApi(200, 'Success', $success);
