@@ -27,7 +27,7 @@ class ProdukController extends Controller
      */
     public function index()
     {
-        $query = Produk::query();
+        $query = Produk::query()->with('bahan');
         $id_resto = request()->user()->id_resto;
 
         $query->where('id_resto', $id_resto);
@@ -257,21 +257,21 @@ class ProdukController extends Controller
 
             $faktur_detail = [];
 
-            foreach ($request->produk as $key => $data) {
-                $produk = Produk::find($data['id_produk']);
+            foreach ($request->bahan as $key => $data) {
+                $bahan = Bahan::find($data['id_bahan']);
 
-                if (!$produk)
+                if (!$bahan)
                 {
-                    throw new Exception('Product not found');
+                    throw new Exception('Bahan tidak ditemukan');
                 }
 
-                $produk->update([
-                    'stok' => $produk->stok + $data['jumlah_stok'],
+                $bahan->update([
+                    'stok' => $bahan->stok + $data['jumlah_stok'],
                 ]);
 
                 $faktur_detail[] = [
                     'id_faktur' => $id_faktur,
-                    'id_produk' => $data['id_produk'],
+                    'id_bahan' => $data['id_bahan'],
                     'jumlah_stok' => $data['jumlah_stok'],
                     'harga_beli' => $data['harga_beli'],
                     'harga_jual' => $data['harga_jual'],
@@ -286,6 +286,44 @@ class ProdukController extends Controller
         } catch (Exception $e) {
             DB::rollback();
             return ApiFormatter::createApi(400, 'Failed. ' . $e->getMessage() . ". Line : " . $e->getLine());
+        }
+    }
+
+    public function ubah_bahan(Request $request, Produk $produk)
+    {
+        $id_bahan = [];
+        foreach ($request->bahan as $data) {
+            $bahan = Bahan::find($data['id_bahan']);
+
+            if (!$bahan) {
+                throw new Exception('Bahan tidak ditemukan');
+            }
+
+            $id_bahan[$data['id_bahan']] = ['qty' => $data['qty']];
+        }
+
+        $produk->bahan()->sync($id_bahan);
+
+        if ($produk) {
+            return ApiFormatter::createApi(200, 'Success', $produk->load('bahan'));
+        } else {
+            return ApiFormatter::createApi(400, 'Failed');
+        }
+    }
+
+    public function bahan(Produk $produk)
+    {
+        $data = $produk->bahan->map(function($bahan) {
+            return [
+                'id' => $bahan->id,
+                'qty' => $bahan->pivot->qty
+            ];
+        });
+
+        if ($produk) {
+            return ApiFormatter::createApi(200, 'Success', $data);
+        } else {
+            return ApiFormatter::createApi(400, 'Failed');
         }
     }
 }

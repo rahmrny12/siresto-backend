@@ -75,6 +75,8 @@ Route::put('lisence/ubah/{id}', [RestoController::class, 'ubah_lisensi']);
 
 // produk
 Route::apiResource('produk', ProdukController::class)->except('show')->middleware('auth:api');
+Route::get('produk/{produk}/bahan', [ProdukController::class, 'bahan'])->middleware('auth:api');
+Route::put('produk/ubah-bahan/{produk}', [ProdukController::class, 'ubah_bahan'])->middleware('auth:api');
 Route::put('produk/ubah-status/{produk}', [ProdukController::class, 'ubah_status'])->middleware('auth:api');
 Route::get('produk/produk-home', [ProdukController::class, 'produk_home']);
 

@@ -13,6 +13,7 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Meja;
 use App\Models\Resto;
+use App\Models\Produk;
 
 class OrderController extends Controller
 {
@@ -140,11 +141,16 @@ class OrderController extends Controller
                     'catatan' => $produk['catatan'],
                 ];
 
-                if ($jumlah_produk > $produk_db->stok)
-                {
-                    throw new Exception('Stock update failed');
+                $produk_bahan_db = DB::table('produk_bahan')->where('id_produk', $produk['id'])->get();
+                foreach ($produk_bahan_db as $bahan) {
+                    $bahan_db = DB::table('bahan')->where('id', $bahan->id_bahan)->first();
+                    if (($jumlah_produk * $bahan->qty) > $bahan_db->stok)
+                    {
+                        throw new Exception('Stok tidak mencukupi');
+                    }
+                    
+                    DB::table('bahan')->where('id', $bahan_db->id)->update(['stok' => $bahan_db->stok - ($jumlah_produk * $bahan->qty)]);
                 }
-                DB::table('produk')->where('id', $produk['id'])->update(['stok' => $produk_db->stok - $jumlah_produk]);
             }
 
             Order::where('id', $id_order)->update(['nilai_laba' => $total_semua_laba]);
