@@ -235,29 +235,42 @@ class OrderController extends Controller
     {
         DB::beginTransaction();
 
-        try {
-            $order_detail = OrderDetail::where('id_order', $id);
+    try {
+        $order_details = OrderDetail::where('id_order', $id)->get();
 
-            foreach ($order_detail->get() as $value) {
-                $produk_db = DB::table('produk')->where('id', $value['id_produk'])->first();
+        if ($order_details->isEmpty()) {
+            throw new Exception('Order details not found.');
+        }
 
-                if ($produk_db != null) {
-                    if ($value['jumlah_beli'] > $produk_db->stok)
-                    {
-                        throw new Exception('Stock update failed');
-                    }
-                    DB::table('produk')->where('id', $value['id_produk'])->update(['stok' => $produk_db->stok + $value['jumlah_beli']]);
-                }
+        foreach ($order_details as $detail) {
+            $produk_db = DB::table('produk')->where('id', $detail['id_produk'])->first();
+
+            if ($produk_db === null) {
+                throw new Exception("Product with ID {$detail['id_produk']} not found.");
             }
 
-            $order_detail->delete();
-            $data = Order::findOrFail($id)->delete();
+            if ($detail['jumlah_beli'] > $produk_db->stok) {
+                throw new Exception("Stock update failed. Not enough stock for product ID {$detail['id_produk']}.");
+            }
+
+            DB::table('produk')->where('id', $detail['id_produk'])->update(['stok' => $produk_db->stok + $detail['jumlah_beli']]);
+        }
+
+            OrderDetail::where('id_order', $id)->delete();
+
+            $order = Order::findOrFail($id);
+            $order->delete();
 
             DB::commit();
-            return ApiFormatter::createApi(200, 'Success', $data);
+
+            return ApiFormatter::createApi(200, 'Success', $order);
         } catch (Exception $e) {
             DB::rollback();
+
+            Log::error('Order deletion failed: ' . $e->getMessage());
+
             return ApiFormatter::createApi(400, 'Failed. ' . $e->getMessage());
         }
     }
+
 }
