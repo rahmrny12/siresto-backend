@@ -287,6 +287,7 @@ class ProdukController extends Controller
                         'jumlah_stok' => $jumlah_stok_bahan * $produk_bahan->qty, // Hitung stok produk yang diperbarui
                         'harga_beli' => $data['harga_beli'],
                         'harga_jual' => $data['harga_jual'],
+                        'id_bahan' => $id_bahan,
                     ];
                 }
             }
