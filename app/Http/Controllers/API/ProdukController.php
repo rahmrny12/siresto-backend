@@ -249,37 +249,47 @@ class ProdukController extends Controller
                 'id_resto' => $id_resto,
                 'id_pegawai' => $user->id,
                 'id_supplier' => $request->id_supplier,
-                'tanggal' => Carbon::createFromFormat("Y-m-d H:i:s", NOW())->toDateString(),
-                'waktu' => Carbon::createFromFormat("Y-m-d H:i:s", NOW())->toTimeString(),
+                'tanggal' => Carbon::now()->toDateString(),
+                'waktu' => Carbon::now()->toTimeString(),
             ]);
 
             $id_faktur = $faktur->id_faktur;
-
             $faktur_detail = [];
 
-            foreach ($request->produk as $key => $data) {
-                $produk = Produk::find($data['id_produk']);
+            foreach ($request->bahan as $key => $data) {
+                $id_bahan = $data['id_bahan'];
+                $jumlah_stok_bahan = $data['jumlah_stok'];
 
-                if (!$produk)
-                {
-                    throw new Exception('Product not found');
+                $produk_bahan_list = DB::table('produk_bahan')
+                    ->where('id_bahan', $id_bahan)
+                    ->get();
+
+                foreach ($produk_bahan_list as $produk_bahan) {
+                    $produk = Produk::find($produk_bahan->id_produk);
+
+                    if (!$produk) {
+                        throw new Exception('Product not found for id_bahan: ' . $id_bahan);
+                    }
+
+                    $produk->update([
+                        'stok' => $produk->stok + ($jumlah_stok_bahan * $produk_bahan->qty),
+                    ]);
+
+                    $faktur_detail[] = [
+                        'id_faktur' => $id_faktur,
+                        'id_produk' => $produk_bahan->id_produk,
+                        'jumlah_stok' => $jumlah_stok_bahan * $produk_bahan->qty,
+                        'harga_beli' => $data['harga_beli'],
+                        'harga_jual' => $data['harga_jual'],
+                    ];
                 }
-
-                $produk->update([
-                    'stok' => $produk->stok + $data['jumlah_stok'],
-                ]);
-
-                $faktur_detail[] = [
-                    'id_faktur' => $id_faktur,
-                    'id_produk' => $data['id_produk'],
-                    'jumlah_stok' => $data['jumlah_stok'],
-                    'harga_beli' => $data['harga_beli'],
-                    'harga_jual' => $data['harga_jual'],
-                ];
             }
 
+            // Insert faktur detail
             FakturProdukDetail::insert($faktur_detail);
-            $data = FakturProduk::find($id_faktur)->first();
+
+            // Ambil data faktur yang baru dibuat beserta detailnya
+            $data = FakturProduk::with('details')->find($id_faktur);
 
             DB::commit();
             return ApiFormatter::createApi(200, 'Success', $data);
