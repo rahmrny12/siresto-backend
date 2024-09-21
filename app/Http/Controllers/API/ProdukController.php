@@ -239,24 +239,13 @@ class ProdukController extends Controller
 
     public function stok_masuk(Request $request)
     {
-        // Validasi request data
-        $validated = $request->validate([
-            'bahan' => 'required|array',
-            'bahan.*.id_bahan' => 'required|exists:bahan,id',
-            'bahan.*.jumlah_stok' => 'required|numeric|min:1',
-            'bahan.*.harga_beli' => 'required|numeric|min:0',
-            'bahan.*.harga_jual' => 'required|numeric|min:0',
-            'id_supplier' => 'required|exists:supplier,id_supplier',
-        ]);
-
-        // Mendapatkan user dan id_resto yang sedang login
         $user = auth()->user();
         $id_resto = $user->id_resto;
 
         DB::beginTransaction();
 
         try {
-            // Membuat FakturProduk baru
+            // Buat Faktur Produk
             $faktur = FakturProduk::create([
                 'id_resto' => $id_resto,
                 'id_pegawai' => $user->id,
@@ -265,38 +254,37 @@ class ProdukController extends Controller
                 'waktu' => Carbon::now()->toTimeString(),
             ]);
 
-            // Ambil ID faktur yang baru saja dibuat
             $id_faktur = $faktur->id_faktur;
+
             $faktur_detail = [];
 
-            // Proses setiap bahan yang dikirim
-            foreach ($request->bahan as $data) {
+            // Loop untuk bahan yang masuk
+            foreach ($request->bahan as $key => $data) {
                 $id_bahan = $data['id_bahan'];
-                $jumlah_stok_bahan = $data['jumlah_stok'];
+                $jumlah_stok_bahan = $data['jumlah_stok']; // Jumlah stok bahan yang masuk
 
-                // Ambil list produk yang menggunakan bahan ini
+                // Cek produk-produk yang menggunakan bahan ini di tabel produk_bahan
                 $produk_bahan_list = DB::table('produk_bahan')
                     ->where('id_bahan', $id_bahan)
                     ->get();
 
                 foreach ($produk_bahan_list as $produk_bahan) {
-                    // Temukan produk terkait
                     $produk = Produk::find($produk_bahan->id_produk);
 
                     if (!$produk) {
                         throw new Exception('Product not found for id_bahan: ' . $id_bahan);
                     }
 
-                    // Update stok produk berdasarkan bahan yang diterima
+                    // Update stok produk berdasarkan bahan yang ditambahkan
                     $produk->update([
                         'stok' => $produk->stok + ($jumlah_stok_bahan * $produk_bahan->qty),
                     ]);
 
-                    // Simpan detail faktur
+                    // Tambahkan ke detail faktur
                     $faktur_detail[] = [
                         'id_faktur' => $id_faktur,
                         'id_produk' => $produk_bahan->id_produk,
-                        'jumlah_stok' => $jumlah_stok_bahan * $produk_bahan->qty,
+                        'jumlah_stok' => $jumlah_stok_bahan * $produk_bahan->qty, // Hitung stok produk yang diperbarui
                         'harga_beli' => $data['harga_beli'],
                         'harga_jual' => $data['harga_jual'],
                     ];
@@ -306,23 +294,14 @@ class ProdukController extends Controller
             // Insert faktur detail
             FakturProdukDetail::insert($faktur_detail);
 
-            // Ambil faktur baru yang sudah lengkap dengan relasi
-            $data = FakturProduk::with([
-                'details' => function ($query) {
-                    $query->with(['produk.kategori_produk']);
-                },
-                'pegawai.level',
-                'supplier'
-            ])->findOrFail($id_faktur); // Pastikan mengambil data dari id_faktur yang baru saja dibuat
+            // Ambil data faktur yang baru dibuat
+            $data = FakturProduk::with('details')->find($id_faktur);
 
             DB::commit();
-
-            // Return data yang baru saja dimasukkan
             return ApiFormatter::createApi(200, 'Success', $data);
-
         } catch (Exception $e) {
             DB::rollback();
-            return ApiFormatter::createApi(400, 'Failed. ' . $e->getMessage() . ". Line: " . $e->getLine());
+            return ApiFormatter::createApi(400, 'Failed. ' . $e->getMessage() . ". Line : " . $e->getLine());
         }
     }
 }
