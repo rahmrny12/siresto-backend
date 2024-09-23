@@ -12,7 +12,7 @@ class FakturProdukDetail extends Model
     protected $table = 'faktur_detail';
     protected $primaryKey = 'id_faktur_detail';
     protected $guarded = ['id_faktur_detail'];
-    protected $with = 'produk';
+    protected $with = ['produk'];
 
     public function faktur()
     {
@@ -21,6 +21,6 @@ class FakturProdukDetail extends Model
 
     public function produk()
     {
-        return $this->hasOne(Produk::class, 'id', 'id_produk');
+        return $this->belongsTo(Produk::class, 'id_produk', 'id');
     }
 }

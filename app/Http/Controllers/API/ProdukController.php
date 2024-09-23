@@ -275,18 +275,13 @@ class ProdukController extends Controller
                         throw new Exception('Product not found for id_bahan: ' . $id_bahan);
                     }
 
-                    // Update stok produk berdasarkan bahan yang ditambahkan
                     $produk->update([
                         'stok' => $produk->stok + ($jumlah_stok_bahan * $produk_bahan->qty),
                     ]);
 
-                    // Tambahkan ke detail faktur
                     $faktur_detail[] = [
                         'id_faktur' => $id_faktur,
-                        'id_produk' => $produk_bahan->id_produk,
-                        'jumlah_stok' => $jumlah_stok_bahan * $produk_bahan->qty, // Hitung stok produk yang diperbarui
-                        'harga_beli' => $data['harga_beli'],
-                        'harga_jual' => $data['harga_jual'],
+                        'jumlah_stok' => $jumlah_stok_bahan * $produk_bahan->qty,
                         'id_bahan' => $id_bahan,
                     ];
                 }
