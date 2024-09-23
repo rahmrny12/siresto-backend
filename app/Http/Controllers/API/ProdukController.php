@@ -245,7 +245,6 @@ class ProdukController extends Controller
         DB::beginTransaction();
 
         try {
-            // Buat Faktur Produk
             $faktur = FakturProduk::create([
                 'id_resto' => $id_resto,
                 'id_pegawai' => $user->id,
@@ -258,12 +257,10 @@ class ProdukController extends Controller
 
             $faktur_detail = [];
 
-            // Loop untuk bahan yang masuk
-            foreach ($request->bahan as $key => $data) {
+            foreach ($request->bahan as $data) {
                 $id_bahan = $data['id_bahan'];
-                $jumlah_stok_bahan = $data['jumlah_stok']; // Jumlah stok bahan yang masuk
+                $jumlah_stok_bahan = $data['jumlah_stok'];
 
-                // Cek produk-produk yang menggunakan bahan ini di tabel produk_bahan
                 $produk_bahan_list = DB::table('produk_bahan')
                     ->where('id_bahan', $id_bahan)
                     ->get();
@@ -281,16 +278,17 @@ class ProdukController extends Controller
 
                     $faktur_detail[] = [
                         'id_faktur' => $id_faktur,
+                        'id_produk' => $produk_bahan->id_produk,
                         'jumlah_stok' => $jumlah_stok_bahan * $produk_bahan->qty,
+                        'harga_beli' => $produk->harga_awal,
+                        'harga_jual' => $produk->harga_jual,
                         'id_bahan' => $id_bahan,
                     ];
                 }
             }
 
-            // Insert faktur detail
             FakturProdukDetail::insert($faktur_detail);
 
-            // Ambil data faktur yang baru dibuat
             $data = FakturProduk::with('details')->find($id_faktur);
 
             DB::commit();
@@ -300,4 +298,5 @@ class ProdukController extends Controller
             return ApiFormatter::createApi(400, 'Failed. ' . $e->getMessage() . ". Line : " . $e->getLine());
         }
     }
+
 }
