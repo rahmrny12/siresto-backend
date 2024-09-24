@@ -74,7 +74,7 @@ class SettingController extends Controller
             $upsertResto = Resto::updateOrCreate(
                 ['id' => $user->id_resto],
                 [
-                    'nama_lengkap' => $request->nama_pemilik,
+                    'nama_pemilik' => $request->nama_pemilik,
                     'nama_resto' => $request->nama_resto,
                     'kategori_bisnis' => $kategori_bisnis->kategori_bisnis,
                     'id_kategori_bisnis' => $request->id_kategori_bisnis,
