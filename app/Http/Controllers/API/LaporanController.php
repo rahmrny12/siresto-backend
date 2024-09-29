@@ -15,6 +15,7 @@ use App\Models\StokOpnameDetail;
 use App\Models\StokOpname;
 use App\Models\FakturProduk;
 use App\Models\FakturProdukDetail;
+use App\Models\User;
 
 class LaporanController extends Controller
 {
@@ -22,9 +23,15 @@ class LaporanController extends Controller
     {
         $tanggal_awal = date('Y-m-d H:i:s', strtotime(request('tanggal-awal')));
         $tanggal_akhir = date('Y-m-d H:i:s', strtotime(request('tanggal-akhir')));
+        $staff = request('staff-name');
 
         $order = Order::whereBetween('created_at', [$tanggal_awal, $tanggal_akhir])
             ->where('id_resto', auth()->user()->id_resto);
+
+        if($staff) {
+            $staff = User::where('name', $staff)->first();
+            $order = $order->where('id_staff', $staff->id);
+        }
 
         if (request('status-order') != null) {
             $order = $order->where('status_order', request('status-order'));

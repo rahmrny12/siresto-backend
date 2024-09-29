@@ -27,7 +27,7 @@ class ProdukController extends Controller
      */
     public function index()
     {
-        $query = Produk::query();
+        $query = Produk::query()->with('bahan');
         $id_resto = request()->user()->id_resto;
 
         $query->where('id_resto', $id_resto);

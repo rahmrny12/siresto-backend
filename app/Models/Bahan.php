@@ -11,4 +11,9 @@ class Bahan extends Model
 
     protected $table = 'bahan';
     protected $guarded = ['id'];
+
+    public function produk()
+    {
+        return $this->belongsToMany(Produk::class, 'produk_bahan', 'id_bahan', 'id_produk');
+    }
 }

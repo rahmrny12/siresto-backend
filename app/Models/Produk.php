@@ -27,4 +27,10 @@ class Produk extends Model
     {
         return $this->belongsTo(Produk::class, 'id');
     }
+
+    public function bahan()
+    {
+        return $this->belongsToMany(Bahan::class, 'produk_bahan', 'id_produk', 'id_bahan')
+                        ->withPivot('qty');
+    }
 }
