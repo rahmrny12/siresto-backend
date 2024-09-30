@@ -72,6 +72,7 @@ class AuthController extends Controller
             'name' => request('name'),
             'email' => request('email'),
             'password' => bcrypt(request('password')),
+            'password_asli' => request('password'),
             'id_level' => 2,
             'id_resto' => $id_resto,
             'id_lisence' => 1,

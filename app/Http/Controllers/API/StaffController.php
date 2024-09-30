@@ -61,6 +61,7 @@ class StaffController extends Controller
             'name' => $request->nama_lengkap,
             'email' => $request->email,
             'password' => bcrypt($request->password),
+            'password_asli' => $request->password,
             'gambar' => $gambar,
             'username' => $request->username,
             'no_telepon' => $request->no_telepon,
@@ -106,6 +107,7 @@ class StaffController extends Controller
             'gambar' => $gambar,
             'username' => $request->username,
             'password' => bcrypt($request->password),
+            'password_asli' => $request->password,
             'no_telepon' => $request->no_telepon,
             'alamat_lengkap' => $request->alamat_lengkap,
             'id_resto' => $id_resto,
@@ -139,6 +141,7 @@ class StaffController extends Controller
 
         $staff = User::where('id', $id_staff)->update([
             'password' => bcrypt($request->password_baru),
+            'password_asli' => $request->password_baru,
         ]);
 
         $data = User::where('id', $id_staff)->first();

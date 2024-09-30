@@ -20,9 +20,7 @@ class SettingController extends Controller
     {
         $uid = $request->user()->id_resto;
 
-        $resto = Resto::find($uid);
         $setting = Setting::where('id_resto', $uid)->first();
-        $setting->print_2x = $resto->print_2x;
         return ApiFormatter::createApi(200, 'Success', $setting);
     }
 
@@ -81,7 +79,6 @@ class SettingController extends Controller
                     'kategori_bisnis' => $kategori_bisnis->kategori_bisnis,
                     'id_kategori_bisnis' => $request->id_kategori_bisnis,
                     'nomor_telepon' => $request->nomor_telepon_aktif,
-                    'print_2x' => $request->print_2x ?? false,
                     'email' => $request->email,
                     'kota' => $request->kota,
                     'provinsi' => $request->provinsi,
@@ -126,6 +123,7 @@ class SettingController extends Controller
 
         User::find(auth()->user()->id)->update([
             'password' => Hash::make($validated['new_password']),
+            'password_asli' => $validated['new_password'],
         ]);
 
         return ApiFormatter::createApi(200, 'Success');
