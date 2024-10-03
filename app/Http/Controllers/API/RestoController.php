@@ -25,8 +25,10 @@ class RestoController extends Controller
         $query = Resto::query();
 
         if ($s = request()->input('s')) {
-            $query->where('nama_resto', 'ILIKE', "%$s%")
-                ->orWhere('nama_pemilik', 'ILIKE', "%$s%");
+            $query->where(function ($q) use ($s) {
+                $q->where('nama_resto', 'ILIKE', "%$s%")
+                    ->orWhere('nama_pemilik', 'ILIKE', "%$s%");
+            });
         }
 
         if ($sort = request()->input('sort')) {
@@ -35,6 +37,9 @@ class RestoController extends Controller
 
         $perPage = request()->limit;
         $result = $query
+            ->whereHas('users', function ($query) {
+                $query->where('id_level', 2);
+            })
             ->with(['users' => function ($query) {
                 $query->where('id_level', 2);
             }])

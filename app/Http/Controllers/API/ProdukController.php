@@ -27,7 +27,7 @@ class ProdukController extends Controller
      */
     public function index()
     {
-        $query = Produk::query();
+        $query = Produk::query()->with('bahan');
         $id_resto = request()->user()->id_resto;
 
         $query->where('id_resto', $id_resto);
@@ -289,7 +289,7 @@ class ProdukController extends Controller
 
             FakturProdukDetail::insert($faktur_detail);
 
-            $data = FakturProduk::with('details')->find($id_faktur);
+            $data = FakturProduk::with('faktur_detail')->find($id_faktur);
 
             DB::commit();
             return ApiFormatter::createApi(200, 'Success', $data);

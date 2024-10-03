@@ -12,6 +12,8 @@ use Exception;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Meja;
+use App\Models\Resto;
+use App\Models\Produk;
 
 class OrderController extends Controller
 {
@@ -24,6 +26,7 @@ class OrderController extends Controller
     {
         $query = Order::query();
         $id_resto = request()->user()->id_resto;
+        $resto = Resto::find($id_resto);
 
         $query->where('id_resto', $id_resto)->whereNotIn('status_order', ['closed']);
 
@@ -31,7 +34,8 @@ class OrderController extends Controller
             $query->where(function ($query) {
                 $query->where('id_staff', request()->user()->id)
                     ->orWhere('source', 'Online Pick-Up')
-                    ->orWhere('source', 'qrcode');
+                    ->orWhere('source', 'qrcode')
+                    ->orWhere('source', 'resto');
             });
         }
 
@@ -44,7 +48,14 @@ class OrderController extends Controller
         $data = $result;
 
         if ($data) {
-            return ApiFormatter::createApi(200, 'Success', $data);
+            return response()->json([
+                'meta' => [
+                    'code' => 200,
+                    'message' => 'success'
+                ],
+                'data' => $data,
+                'print_2x' => $resto->print_2x
+            ]);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
         }
@@ -74,9 +85,12 @@ class OrderController extends Controller
         DB::beginTransaction();
 
         try {
-            $order = Order::where('id_meja', $request->id_meja)->where('id_resto', $id_resto)->latest()->first();
+            $order = null;
+            if($request->id_meja) {
+                $order = Order::where('id_meja', $request->id_meja)->where('id_resto', $id_resto)->latest()->first();
+            }
 
-            if ($order->status_order != 'closed') {
+            if ($order && $order->status_order != 'closed') {
                 throw new \Exception('Sedang ada pelanggan');
             }
 
@@ -127,11 +141,16 @@ class OrderController extends Controller
                     'catatan' => $produk['catatan'],
                 ];
 
-                if ($jumlah_produk > $produk_db->stok)
-                {
-                    throw new Exception('Stock update failed');
+                $produk_bahan_db = DB::table('produk_bahan')->where('id_produk', $produk['id'])->get();
+                foreach ($produk_bahan_db as $bahan) {
+                    $bahan_db = DB::table('bahan')->where('id', $bahan->id_bahan)->first();
+                    if (($jumlah_produk * $bahan->qty) > $bahan_db->stok)
+                    {
+                        throw new Exception('Stok tidak mencukupi');
+                    }
+
+                    DB::table('bahan')->where('id', $bahan_db->id)->update(['stok' => $bahan_db->stok - ($jumlah_produk * $bahan->qty)]);
                 }
-                DB::table('produk')->where('id', $produk['id'])->update(['stok' => $produk_db->stok - $jumlah_produk]);
             }
 
             Order::where('id', $id_order)->update(['nilai_laba' => $total_semua_laba]);
