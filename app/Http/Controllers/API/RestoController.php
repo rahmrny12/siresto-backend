@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\Resto;
 use App\Models\Setting;
