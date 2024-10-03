@@ -53,20 +53,39 @@ class RestoController extends Controller
         }
     }
 
+
     public function resto_row(Request $request)
     {
+        $user = request()->user(); // Retrieve the authenticated user
 
-        $user = $request->user();
+        // Log the authenticated user
+        Log::info('Authenticated user:', ['user' => $user]);
+
         if (!$user) {
-            return response()->json(['message' => 'User not authenticated'], 401);
+            Log::error('User not authenticated');
+            return ApiFormatter::createApi(404, 'User not authenticated');
         }
 
-        $id_resto = $user->id_resto;
+        $id_resto = $user->id_resto; // Get the id_resto from the user
+
+        // Log the id_resto
+        Log::info('Resto ID:', ['id_resto' => $id_resto]);
+
         if (!$id_resto) {
-            return response()->json(['message' => 'id_resto is null'], 400);
+            Log::error('Resto ID not found');
+            return ApiFormatter::createApi(404, 'Resto ID not found');
         }
-        
+
         $data = Resto::where('id', $id_resto)->first();
+
+        // Log the retrieved resto data
+        Log::info('Resto Data:', ['data' => $data]);
+
+        if (!$data) {
+            Log::error('Resto not found', ['id_resto' => $id_resto]);
+            return ApiFormatter::createApi(404, 'Resto not found');
+        }
+
         return ApiFormatter::createApi(200, 'Success', $data);
     }
 
