@@ -55,7 +55,17 @@ class RestoController extends Controller
 
     public function resto_row(Request $request)
     {
-        $id_resto = request()->user()->id_resto;
+
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        $id_resto = $user->id_resto;
+        if (!$id_resto) {
+            return response()->json(['message' => 'id_resto is null'], 400);
+        }
+        
         $data = Resto::where('id', $id_resto)->first();
         return ApiFormatter::createApi(200, 'Success', $data);
     }
