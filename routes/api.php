@@ -43,7 +43,7 @@ use App\Http\Controllers\API\SupplierController;
 // resto
 Route::apiResource('/resto', RestoController::class)->except('show')->middleware('auth:api');
 Route::get('resto/setting-resto', [RestoController::class, 'setting_resto']); // mengambil setting resto
-Route::prefix('resto')->group(function () {
+Route::prefix('resto')->middleware('auth:api')->group(function () {
     Route::get('/show', [RestoController::class, 'resto_row']);
     Route::get('/all', [RestoController::class, 'resto_all']);
     Route::put('/ubah-status/{resto}', [RestoController::class, 'ubah_status']);
