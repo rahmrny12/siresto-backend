@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\Produk;
 use App\Models\Resto;
@@ -17,6 +18,7 @@ use App\Models\FakturProduk;
 use App\Models\FakturProdukDetail;
 use App\Models\Supplier;
 use App\Models\Bahan;
+use App\Models\ProdukBahan;
 
 class ProdukController extends Controller
 {
@@ -297,6 +299,62 @@ class ProdukController extends Controller
             DB::rollback();
             return ApiFormatter::createApi(400, 'Failed. ' . $e->getMessage() . ". Line : " . $e->getLine());
         }
+    }
+
+    public function bahan($id)
+    {
+        // Cari produk berdasarkan ID
+        $produk = Produk::with('bahan')->findOrFail($id);
+
+        // Mengambil bahan yang terkait dengan produk, termasuk quantity (qty)
+        $bahan = $produk->bahan->map(function ($bahan) {
+            return [
+                'nama_bahan' => $bahan->nama_bahan,
+                'qty' => $bahan->pivot->qty,  // Mengambil qty dari pivot table
+                'stok' => $bahan->stok
+            ];
+        });
+
+        // Kembalikan data dalam format JSON
+        return response()->json([
+            'produk' => $produk->nama_produk,
+            'bahan' => $bahan
+        ]);
+    }
+
+    public function ubah_bahan(Request $request, $id_produk)
+    {
+        // Validasi request
+        $validator = Validator::make($request->all(), [
+            'bahan' => 'required|array',
+            'bahan.*.id_bahan' => 'required|integer|exists:bahan,id',
+            'bahan.*.qty' => 'required|numeric|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $produk = Produk::find($id_produk);
+
+        if (!$produk) {
+            return response()->json(['message' => 'Produk tidak ditemukan'], 404);
+        }
+
+        ProdukBahan::where('id_produk', $id_produk)->delete();
+
+        foreach ($request->bahan as $bahan) {
+            ProdukBahan::create([
+                'id_produk' => $id_produk,
+                'id_bahan' => $bahan['id_bahan'],
+                'qty' => $bahan['qty']
+            ]);
+        }
+
+        return response()->json(['message' => 'Bahan produk berhasil diperbarui'], 200);
     }
 
 }

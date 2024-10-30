@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Helper\ApiFormatter;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Exception;
 
 use App\Models\User;
@@ -66,14 +67,21 @@ class StaffController extends Controller
             'no_telepon' => $request->no_telepon,
             'alamat_lengkap' => $request->alamat_lengkap,
             'id_resto' => $id_resto,
-            'id_level' => 3,
+            'id_level' => $request->id_level,
             'id_lisence' => 0,
         ]);
+
+        if ($staff && $request->id_level == 4) {
+            $emailSent = $this->sendVerificationEmail($staff);
+            $message = $emailSent ? 'Verifikasi email telah dikirim.' : 'Gagal mengirim email verifikasi.';
+        } else {
+            $message = 'Staff Berhasil Ditambahkan';
+        }
 
         $data = User::where('id', $staff->id)->first();
 
         if ($data) {
-            return ApiFormatter::createApi(200, 'Success', $data);
+            return ApiFormatter::createApi(200, $message, $data);
         } else {
             return ApiFormatter::createApi(400, 'Failed');
         }
@@ -203,4 +211,20 @@ class StaffController extends Controller
             return ApiFormatter::createApi(400, 'Failed');
         }
     }
+
+    public function sendVerificationEmail(User $user)
+    {
+        try {
+            Mail::send('emails.verification', ['user' => $user], function ($message) use ($user) {
+                $message->to($user->email);
+                $message->subject('Verifikasi Email Anda');
+            });
+            return true;
+        } catch (\Exception $e) {
+            \Log::error('Email failed to send: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
 }

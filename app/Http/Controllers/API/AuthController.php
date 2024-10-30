@@ -126,7 +126,7 @@ class AuthController extends Controller
             }
         }
 
-        if ($user->level->level == 'Staff') {
+        if ($user->level->level == 'Staff' || $user->level->level == 'OwnerReport') {
             if (!auth()->attempt([$fieldType => $request->email, 'password' => $request->password])) {
                 return ApiFormatter::createApi(400, 'Email Atau Password Salah', [
                     'success' => false,
@@ -139,7 +139,7 @@ class AuthController extends Controller
 
         $auth = auth()->user();
 
-        if ($auth->level->level == 'Staff') {
+        if ($auth->level->level == 'Staff' || $auth->level->level == 'OwnerReport') {
             $owner = User::where('id_resto', $auth->id_resto)->where('id_level', 2)->first();
             $lisence = $owner->lisence->lisence;
         } else {
@@ -159,7 +159,6 @@ class AuthController extends Controller
 
         return ApiFormatter::createApi(200, 'Login Berhasil', $success);
     }
-
     /**
      * Get the authenticated User.
      *
@@ -206,4 +205,5 @@ class AuthController extends Controller
             'expires_in' => auth()->factory()->getTTL() * 60
         ]);
     }
+    
 }

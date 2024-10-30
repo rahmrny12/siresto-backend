@@ -24,6 +24,8 @@ use App\Http\Controllers\API\ResetPasswordController;
 use App\Http\Controllers\API\SendOTPController;
 use App\Http\Controllers\API\UserGuestController;
 use App\Http\Controllers\API\SupplierController;
+use App\Http\Controllers\API\GroupOutletController;
+use App\Http\Controllers\API\VerificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -80,6 +82,19 @@ Route::put('produk/ubah-bahan/{produk}', [ProdukController::class, 'ubah_bahan']
 Route::put('produk/ubah-status/{produk}', [ProdukController::class, 'ubah_status'])->middleware('auth:api');
 Route::get('produk/produk-home', [ProdukController::class, 'produk_home']);
 
+// Group outlet
+Route::middleware('auth:api')->group(function () {
+    Route::get('group-outlet', [GroupOutletController::class, 'index']);
+    Route::post('group-outlet', [GroupOutletController::class, 'store']);
+    Route::get('group-outlet/{id}', [GroupOutletController::class, 'show']);
+    Route::put('group-outlet/{id}', [GroupOutletController::class, 'update']);
+    Route::delete('group-outlet/{id}', [GroupOutletController::class, 'destroy']);
+    Route::get('/resto/{id}/users', [GroupOutletController::class, 'getUsersByResto']);
+    Route::post('/group-outlet/{id}/assign-multi-outlet', [GroupOutletController::class, 'assignMultiOutlet']);
+    Route::delete('group-outlet/{id}/remove-multi-outlet', [GroupOutletController::class, 'removeMultiOutlet']);
+    });
+
+//bahan
 Route::apiResource('bahan', BahanController::class)->except('show')->middleware('auth:api');
 
 // meja
@@ -113,6 +128,7 @@ Route::apiResource('promo', PromoController::class)->middleware('auth:api');
 
 // staff
 Route::apiResource('staff', StaffController::class)->middleware('auth:api');
+Route::post('send-verification', [StaffController::class, 'sendVerificationEmail']);
 Route::prefix('staff')->group(function () {
     Route::put('/reset-password/{staff}', [StaffController::class, 'reset_password'])->middleware('auth:api');
     Route::put('/ubah-profile/{staff}', [StaffController::class, 'ubah_profile'])->middleware('auth:api');
@@ -154,6 +170,9 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('me', [AuthController::class, 'me']);
 });
+
+// verify
+Route::get('/verify-email', [VerificationController::class, 'verifyEmail']);
 
 // supplier
 Route::apiResource('supplier', SupplierController::class)->except('show')->middleware('auth:api');
