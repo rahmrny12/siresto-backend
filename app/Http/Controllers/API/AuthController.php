@@ -126,6 +126,13 @@ class AuthController extends Controller
             }
         }
 
+        if ($user->id_level == 4 && is_null($user->email_verified_at)) {
+            return ApiFormatter::createApi(403, 'Email Belum Diverifikasi. Silakan verifikasi email Anda untuk melanjutkan.', [
+                'success' => false,
+                'data' => null
+            ]);
+        }
+
         if ($user->level->level == 'Staff' || $user->level->level == 'OwnerReport') {
             if (!auth()->attempt([$fieldType => $request->email, 'password' => $request->password])) {
                 return ApiFormatter::createApi(400, 'Email Atau Password Salah', [
@@ -205,5 +212,5 @@ class AuthController extends Controller
             'expires_in' => auth()->factory()->getTTL() * 60
         ]);
     }
-    
+
 }

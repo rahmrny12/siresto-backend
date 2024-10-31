@@ -51,18 +51,18 @@
 <body>
     <div class="email-container">
         <div class="header">
-            <h1 style="margin: 0; font-size: 24px; color: #333;">Pawarta</h1>
+            <h1 style="margin: 0; font-size: 24px; color: #333;">Siresto</h1>
         </div>
         <div class="content">
             <h2 style="font-size: 20px; color: #333;">Verifikasi Email Anda</h2>
-            <p style="font-size: 16px; color: #555;">Klik tombol di bawah untuk memverifikasi User Anda.</p>
+            <p style="font-size: 16px; color: #555;">Klik tombol di bawah untuk memverifikasi User Anda Menjadi OwnerReport.</p>
             <a href="{{ url('/api/verify-email?email=' . urlencode($user->email)) }}" style="display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #333; text-decoration: none; border-radius: 5px;">
                 Verifikasi Email
             </a>
-            <p style="font-size: 16px; color: #555; margin-top: 20px;">Terimakasih,<br>Pawarta</p>
+            <p style="font-size: 16px; color: #555; margin-top: 20px;">Terimakasih,<br>Siresto</p>
         </div>
         <div class="footer">
-            © 2024 Pawarta. All rights reserved.
+            © 2024 Siresto. All rights reserved.
         </div>
     </div>
 </body>
