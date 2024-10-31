@@ -263,6 +263,11 @@ class ProdukController extends Controller
                 $id_bahan = $data['id_bahan'];
                 $jumlah_stok_bahan = $data['jumlah_stok'];
 
+                // Update stok di tabel bahan
+                DB::table('bahan')
+                    ->where('id', $id_bahan)
+                    ->increment('stok', $jumlah_stok_bahan);
+
                 $produk_bahan_list = DB::table('produk_bahan')
                     ->where('id_bahan', $id_bahan)
                     ->get();
@@ -273,10 +278,6 @@ class ProdukController extends Controller
                     if (!$produk) {
                         throw new Exception('Product not found for id_bahan: ' . $id_bahan);
                     }
-
-                    $produk->update([
-                        'stok' => $produk->stok + ($jumlah_stok_bahan * $produk_bahan->qty),
-                    ]);
 
                     $faktur_detail[] = [
                         'id_faktur' => $id_faktur,

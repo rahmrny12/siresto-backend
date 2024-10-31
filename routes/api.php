@@ -81,6 +81,7 @@ Route::get('produk/{produk}/bahan', [ProdukController::class, 'bahan'])->middlew
 Route::put('produk/ubah-bahan/{produk}', [ProdukController::class, 'ubah_bahan'])->middleware('auth:api');
 Route::put('produk/ubah-status/{produk}', [ProdukController::class, 'ubah_status'])->middleware('auth:api');
 Route::get('produk/produk-home', [ProdukController::class, 'produk_home']);
+Route::post('stok/stok-masuk', [ProdukController::class, 'stok_masuk'])->middleware('auth:api');
 
 // Group outlet
 Route::middleware('auth:api')->group(function () {
@@ -177,4 +178,3 @@ Route::get('/verify-email', [VerificationController::class, 'verifyEmail']);
 // supplier
 Route::apiResource('supplier', SupplierController::class)->except('show')->middleware('auth:api');
 Route::get('stok/supplier/all', [SupplierController::class, 'supplier_all'])->middleware('auth:api');
-Route::post('stok/stok-masuk', [ProdukController::class, 'stok_masuk'])->middleware('auth:api');
