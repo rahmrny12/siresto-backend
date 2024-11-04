@@ -139,4 +139,27 @@ class BahanController extends Controller
             return ApiFormatter::createApi(400, 'Failed');
         }
     }
+
+    public function getAllBahan()
+    {
+        try {
+            $id_resto = request()->query('id_resto'); // Mengambil id_resto dari query parameters
+
+            if (!$id_resto) {
+                return ApiFormatter::createApi(400, 'id_resto is required'); // Pastikan id_resto diterima
+            }
+
+            // Mengambil bahan berdasarkan id_resto yang dikirim dari frontend
+            $result = Bahan::where('id_resto', $id_resto)->get();
+
+            if ($result->isNotEmpty()) {
+                return ApiFormatter::createApi(200, 'Success', $result);
+            } else {
+                return ApiFormatter::createApi(404, 'No Bahan Found');
+            }
+        } catch (Exception $error) {
+            return ApiFormatter::createApi(500, 'An error occurred: ' . $error->getMessage());
+        }
+    }
+
 }

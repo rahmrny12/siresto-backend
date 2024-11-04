@@ -97,6 +97,7 @@ Route::middleware('auth:api')->group(function () {
 
 //bahan
 Route::apiResource('bahan', BahanController::class)->except('show')->middleware('auth:api');
+Route::get('/bahan/all', [BahanController::class, 'getAllBahan']);
 
 // meja
 Route::apiResource('meja', MejaController::class)->except('show')->middleware('auth:api');
