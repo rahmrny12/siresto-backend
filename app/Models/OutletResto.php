@@ -13,4 +13,9 @@ class OutletResto extends Model
     protected $fillable = ['id_group_outlet', 'id_resto']; // Kolom yang bisa diisi
 
     public $timestamps = false; // Nonaktifkan timestamps
+
+    public function resto()
+    {
+        return $this->belongsTo(Resto::class, 'id_resto', 'id'); // id_resto dari OutletResto -> id di Resto
+    }
 }

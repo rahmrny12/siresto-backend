@@ -357,5 +357,4 @@ class ProdukController extends Controller
 
         return response()->json(['message' => 'Bahan produk berhasil diperbarui'], 200);
     }
-
 }

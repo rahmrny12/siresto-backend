@@ -12,6 +12,8 @@ use App\Models\Order;
 use App\Models\Produk;
 use App\Models\Resto;
 use App\Models\User;
+use App\Models\OutletResto;
+use App\Models\GroupOutlet;
 
 class DashboardController extends Controller
 {
@@ -112,4 +114,108 @@ class DashboardController extends Controller
 
         return ApiFormatter::createApi(200, '', $data);
     }
+
+    public function multioutlet(Request $request)
+    {
+        $user = auth()->user();
+
+        $id_group_outlet = GroupOutlet::where('id_multi_outlet', $user->id)
+            ->pluck('id')->first();
+
+        if (!$id_group_outlet) {
+            return response()->json(['message' => 'Group outlet tidak ditemukan.'], 404);
+        }
+
+        $id_resto_list = OutletResto::where('id_group_outlet', $id_group_outlet)->pluck('id_resto');
+
+        $penjualan_hari_ini = Order::whereDate('created_at', now())
+            ->whereIn('id_resto', $id_resto_list)
+            ->count();
+
+        $jumlah_produk = Produk::whereIn('id_resto', $id_resto_list)->count();
+
+        $pendapatan_hari_ini = Order::whereDate('created_at', now())
+            ->whereIn('id_resto', $id_resto_list)
+            ->sum('nilai_transaksi');
+
+        $total_staff = User::whereIn('id_resto', $id_resto_list)
+            ->where('id_level', 3)
+            ->count();
+
+        $bulan_text = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+
+        $data_penjualan_per_bulan = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $penjualan_per_bulan = Order::query()
+                ->select(\DB::raw("SUM(nilai_transaksi) as total"))
+                ->whereMonth('created_at', $i)
+                ->whereIn('id_resto', $id_resto_list)
+                ->whereYear('created_at', now()->year)
+                ->groupByRaw("EXTRACT(MONTH FROM created_at)")
+                ->first();
+
+            $data_penjualan_per_bulan[] = [
+                'label' => $bulan_text[$i - 1],
+                'value' => $penjualan_per_bulan->total ?? 0,
+            ];
+        }
+
+        $data_penjualan_per_resto = [];
+        foreach ($id_resto_list as $id_resto) {
+            $resto = Resto::where('id', $id_resto)->first();
+
+            $penjualan_hari_ini_resto = Order::whereDate('created_at', now())
+                ->where('id_resto', $id_resto)
+                ->count();
+
+            $jumlah_produk_resto = Produk::where('id_resto', $id_resto)->count();
+
+            $pendapatan_hari_ini_resto = Order::whereDate('created_at', now())
+                ->where('id_resto', $id_resto)
+                ->sum('nilai_transaksi');
+
+            $total_staff_resto = User::where('id_resto', $id_resto)
+                ->where('id_level', 3)
+                ->count();
+
+            $penjualan_per_bulan_resto = [];
+            for ($i = 1; $i <= 12; $i++) {
+                $penjualan_bulan_resto = Order::query()
+                    ->select(\DB::raw("SUM(nilai_transaksi) as total"))
+                    ->whereMonth('created_at', $i)
+                    ->where('id_resto', $id_resto)
+                    ->whereYear('created_at', now()->year)
+                    ->groupByRaw("EXTRACT(MONTH FROM created_at)")
+                    ->first();
+
+                $penjualan_per_bulan_resto[] = [
+                    'label' => $bulan_text[$i - 1],
+                    'value' => $penjualan_bulan_resto->total ?? 0,
+                ];
+            }
+
+            $data_penjualan_per_resto[] = [
+                'id_resto' => $id_resto,
+                'nama_resto' => $resto->nama_resto ?? 'Unknown',
+                'penjualan_hari_ini' => $penjualan_hari_ini_resto,
+                'jumlah_produk' => $jumlah_produk_resto,
+                'pendapatan_hari_ini' => $pendapatan_hari_ini_resto,
+                'total_staff' => $total_staff_resto,
+                'penjualan_per_bulan' => $penjualan_per_bulan_resto,
+            ];
+        }
+
+        return response()->json([
+            'penjualan_hari_ini' => $penjualan_hari_ini,
+            'jumlah_produk' => $jumlah_produk,
+            'pendapatan_hari_ini' => $pendapatan_hari_ini,
+            'total_staff' => $total_staff,
+            'data_penjualan_per_bulan' => $data_penjualan_per_bulan,
+            'data_penjualan_per_resto' => $data_penjualan_per_resto,
+        ]);
+    }
+
 }

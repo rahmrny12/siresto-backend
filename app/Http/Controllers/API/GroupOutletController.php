@@ -17,7 +17,6 @@ class GroupOutletController extends Controller
         return response()->json($groupOutlets);
     }
 
-
     public function store(Request $request)
     {
         $request->validate([
@@ -113,7 +112,10 @@ class GroupOutletController extends Controller
 
     public function getUsersByResto($restoId)
     {
-        $users = User::where('id_resto', $restoId)->get();
+        $users = User::where('id_resto', $restoId)
+                     ->whereIn('id_level', [2, 4])
+                     ->get();
+
         return response()->json($users);
     }
 
@@ -148,6 +150,20 @@ class GroupOutletController extends Controller
         $groupOutlet->save();
 
         return response()->json(['message' => 'Multi Outlet removed successfully']);
+    }
+
+    public function checkMultiOutlet(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer',
+        ]);
+
+        $exists = GroupOutlet::where('id_multi_outlet', $request->id)->exists();
+
+        return response()->json([
+            'exists' => $exists,
+            'message' => $exists ? 'ID exists in id_multi_outlet' : 'ID does not exist in id_multi_outlet',
+        ], 200);
     }
 
 }

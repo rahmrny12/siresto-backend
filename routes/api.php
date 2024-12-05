@@ -94,6 +94,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/group-outlet/{id}/assign-multi-outlet', [GroupOutletController::class, 'assignMultiOutlet']);
     Route::delete('group-outlet/{id}/remove-multi-outlet', [GroupOutletController::class, 'removeMultiOutlet']);
     });
+Route::post('/check-multi-outlet', [GroupOutletController::class, 'checkMultiOutlet']);
 
 //bahan
 Route::apiResource('bahan', BahanController::class)->except('show')->middleware('auth:api');
@@ -122,6 +123,13 @@ Route::prefix('laporan')->group(function () {
     Route::get('/mutasi-stok', [LaporanController::class, 'mutasi_stok'])->middleware('auth:api');
     Route::get('/stok-opname', [LaporanController::class, 'laporan_stok_opname'])->middleware('auth:api');
     Route::post('/simpan-stok-opname', [LaporanController::class, 'simpan_stok_opname'])->middleware('auth:api');
+
+    Route::get('/resto-group', [LaporanController::class, 'get_resto_group'])->middleware('auth:api');
+    Route::get('/laporan-penjualan-group', [LaporanController::class, 'laporan_penjualan_group'])->middleware('auth:api');
+    Route::get('/laporan-stok-group', [LaporanController::class, 'laporan_stok_group'])->middleware('auth:api');
+    Route::get('/mutasi-stok-group', [LaporanController::class, 'mutasi_stok_group'])->middleware('auth:api');
+    Route::get('/laporan-pendapatan-group', [LaporanController::class, 'laporan_pendapatan_group'])->middleware('auth:api');
+
 });
 
 // promo
@@ -151,6 +159,7 @@ Route::prefix('setting')->group(function () {
 Route::prefix('dashboard')->group(function () {
     Route::get('/owner', [DashboardController::class, 'owner'])->middleware('auth:api');
     Route::get('/superadmin', [DashboardController::class, 'superadmin'])->middleware('auth:api');
+    Route::get('/multi_outlet', [DashboardController::class, 'multioutlet'])->middleware('auth:api');
 });
 
 // frontend

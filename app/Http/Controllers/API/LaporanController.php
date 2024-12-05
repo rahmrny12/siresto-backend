@@ -16,6 +16,8 @@ use App\Models\StokOpname;
 use App\Models\FakturProduk;
 use App\Models\FakturProdukDetail;
 use App\Models\User;
+use App\Models\GroupOutlet;
+use App\Models\OutletResto;
 
 class LaporanController extends Controller
 {
@@ -72,8 +74,9 @@ class LaporanController extends Controller
             $service_charge += $value->service_charge;
 
             foreach ($value->order_detail as $key => $order_detail) {
-                $hpp += $order_detail->produk->harga_awal * $order_detail->jumlah_beli;
+                $hpp += optional($order_detail->produk)->harga_awal * $order_detail->jumlah_beli;
             }
+
         }
 
         $laba_bersih = $penjualan_bersih - $hpp;
@@ -160,16 +163,6 @@ class LaporanController extends Controller
         $tanggal_awal = date('Y-m-d H:i:s', strtotime(request('tanggal-awal')));
         $tanggal_akhir = date('Y-m-d H:i:s', strtotime(request('tanggal-akhir')));
 
-        // $data_stok = DB::table('tb_faktur')
-        //     ->select('nama_supplier', 'tb_produk.id_produk', 'tb_produk.nama_produk', DB::raw('SUM(jumlah_stok) as jumlah_stok'), DB::raw('MAX(tb_faktur.created_at) as created_at'))
-        //     ->join('tb_faktur_detail', 'tb_faktur.id_faktur', 'tb_faktur_detail.id_faktur')
-        //     ->join('tb_produk', 'tb_produk.id_produk', 'tb_faktur_detail.id_produk')
-        //     ->join('tb_supplier', 'tb_supplier.id_supplier', 'tb_faktur.id_supplier')
-        //     ->join('users', 'users.id', 'tb_faktur.id_pegawai')
-        //     ->groupBy('tb_produk.id_produk', 'tb_supplier.id_supplier')
-        //     ->whereBetween('tb_faktur.created_at', [$tanggal_awal, $tanggal_akhir])
-        //     ->where('tb_faktur.id_toko', auth()->user()->id_toko);
-
         $data_stok = FakturProdukDetail::join('faktur', 'faktur.id_faktur', 'faktur_detail.id_faktur')
             ->leftJoin('supplier', 'supplier.id_supplier', 'faktur.id_supplier')
             ->leftJoin('users', 'users.id', 'faktur.id_pegawai')
@@ -182,4 +175,294 @@ class LaporanController extends Controller
             return ApiFormatter::createApi(400, 'Failed');
         }
     }
+
+    public function laporan_penjualan_group(Request $request)
+    {
+        $request->validate([
+            'tanggal-awal' => 'required|date_format:d-m-Y',
+            'tanggal-akhir' => 'required|date_format:d-m-Y',
+        ]);
+
+        $tanggal_awal = date('Y-m-d 00:00:00', strtotime($request->input('tanggal-awal')));
+        $tanggal_akhir = date('Y-m-d 23:59:59', strtotime($request->input('tanggal-akhir')));
+
+        $status_order = $request->input('status-order');
+        $id_resto = $request->input('id-resto');
+
+        $user = auth()->user();
+
+        $id_group_outlet = GroupOutlet::where('id_multi_outlet', $user->id)
+            ->pluck('id')
+            ->first();
+
+        if (!$id_group_outlet) {
+            return ApiFormatter::createApi(404, 'Group outlet tidak ditemukan.');
+        }
+
+        $id_resto_list = OutletResto::where('id_group_outlet', $id_group_outlet)
+            ->pluck('id_resto');
+
+        $order = Order::whereIn('id_resto', $id_resto_list)
+            ->whereBetween('created_at', [$tanggal_awal, $tanggal_akhir])
+            ->with('resto:id,nama_resto');
+
+        if (!is_null($status_order)) {
+            $order->where('status_order', $status_order);
+        }
+
+        if (!is_null($id_resto)) {
+            $order->where('id_resto', $id_resto);
+        }
+
+        $orders = $order->orderBy('created_at', 'desc')->get();
+
+        if ($orders->isEmpty()) {
+            return ApiFormatter::createApi(404, 'Tidak ada data penjualan untuk periode yang dipilih.');
+        }
+
+        $orders->transform(function ($order) {
+            $order->nama_resto = $order->resto ? $order->resto->nama_resto : 'Nama Restoran Tidak Ditemukan';
+            return $order;
+        });
+
+        return ApiFormatter::createApi(200, 'Data ditemukan', $orders);
+    }
+
+    public function get_resto_group(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return ApiFormatter::createApi(401, 'Unauthorized: User tidak ditemukan.');
+        }
+
+        $id_group_outlet = GroupOutlet::where('id_multi_outlet', $user->id)
+            ->pluck('id')
+            ->first();
+
+        if (!$id_group_outlet) {
+            return ApiFormatter::createApi(404, 'Group outlet tidak ditemukan.');
+        }
+
+        $restoran = OutletResto::where('id_group_outlet', $id_group_outlet)
+            ->with('resto:id,nama_resto')
+            ->get();
+
+        $restoran->transform(function ($outlet) {
+            $outlet->nama_resto = $outlet->resto ? $outlet->resto->nama_resto : 'Nama Restoran Tidak Ditemukan';
+            unset($outlet->resto);
+            return $outlet;
+        });
+
+        if ($restoran->isEmpty()) {
+            return ApiFormatter::createApi(404, 'Data restoran tidak ditemukan.');
+        }
+
+        return ApiFormatter::createApi(200, 'Data restoran ditemukan.', $restoran);
+    }
+
+    public function laporan_stok_group(Request $request)
+    {
+        $id_group_outlet = GroupOutlet::where('id_multi_outlet', auth()->user()->id)
+            ->pluck('id')
+            ->first();
+
+        if (!$id_group_outlet) {
+            return ApiFormatter::createApi(404, 'Group outlet tidak ditemukan.');
+        }
+
+        $id_resto_list = OutletResto::where('id_group_outlet', $id_group_outlet)
+            ->pluck('id_resto');
+
+        if ($id_resto_list->isEmpty()) {
+            return ApiFormatter::createApi(404, 'Tidak ada restoran yang terkait dengan grup outlet ini.');
+        }
+
+        $id_resto = $request->query('id_resto');
+        $query = Produk::with('kategori_produk')
+            ->whereIn('id_resto', $id_resto_list);
+
+        if ($id_resto) {
+            $query->where('id_resto', $id_resto);
+        }
+
+        $data_stok = $query->select(
+            'id_resto',
+            'nomor_sku',
+            'nama_produk',
+            'stok',
+            'harga_awal',
+            'harga_jual',
+            'id_kategori_produk',
+            DB::raw('stok * harga_awal as nilai_transaksi')
+        )
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+        if ($data_stok->isEmpty()) {
+            return ApiFormatter::createApi(404, 'Tidak ada data stok ditemukan.');
+        }
+
+        $formatted_data = $data_stok->map(function ($item) {
+            return [
+                'id_resto' => $item->id_resto,
+                "nomor_sku" => $item->nomor_sku,
+                'nama_produk' => $item->nama_produk,
+                'stok' => $item->stok,
+                'harga_awal' => $item->harga_awal,
+                'harga_jual' => $item->harga_jual,
+                'kategori_produk' => $item->kategori_produk,
+                'nilai_transaksi' => $item->nilai_transaksi,
+            ];
+        });
+
+        return ApiFormatter::createApi(200, 'Laporan Stok Group berhasil', $formatted_data);
+    }
+
+    public function mutasi_stok_group(Request $request)
+    {
+        $tanggal_awal = date('Y-m-d H:i:s', strtotime($request->input('tanggal-awal')));
+        $tanggal_akhir = date('Y-m-d H:i:s', strtotime($request->input('tanggal-akhir')));
+
+        // Ambil group outlet pengguna
+        $id_group_outlet = GroupOutlet::where('id_multi_outlet', auth()->user()->id)
+            ->pluck('id')
+            ->first();
+
+        if (!$id_group_outlet) {
+            return ApiFormatter::createApi(404, 'Group outlet tidak ditemukan.');
+        }
+
+        // Ambil daftar resto terkait grup outlet
+        $id_resto_list = OutletResto::where('id_group_outlet', $id_group_outlet)
+            ->pluck('id_resto');
+
+        if ($id_resto_list->isEmpty()) {
+            return ApiFormatter::createApi(404, 'Tidak ada restoran terkait dengan grup outlet ini.');
+        }
+
+        // Filter berdasarkan id-resto jika dikirimkan
+        $query = FakturProdukDetail::join('faktur', 'faktur.id_faktur', '=', 'faktur_detail.id_faktur')
+            ->leftJoin('supplier', 'supplier.id_supplier', '=', 'faktur.id_supplier')
+            ->leftJoin('users', 'users.id', '=', 'faktur.id_pegawai')
+            ->leftJoin('produk', 'produk.id', '=', 'faktur_detail.id_produk')
+            ->leftJoin('kategori_produk', 'kategori_produk.id', '=', 'produk.id_kategori_produk')
+            ->whereIn('supplier.id_resto', $id_resto_list)
+            ->whereBetween('faktur.created_at', [$tanggal_awal, $tanggal_akhir]);
+
+        // Jika ada id-resto dalam request, tambahkan filter
+        if ($request->has('id-resto') && $request->input('id-resto') !== '') {
+            $query->where('supplier.id_resto', $request->input('id-resto'));
+        }
+
+        $data_stok = $query
+            ->orderBy('faktur.created_at', 'desc')
+            ->select(
+                'faktur_detail.id_faktur_detail',
+                'faktur_detail.id_faktur',
+                'faktur_detail.id_produk',
+                'faktur_detail.jumlah_stok',
+                'faktur_detail.harga_beli',
+                'faktur_detail.harga_jual',
+                'faktur.created_at as tanggal_faktur',
+                'supplier.nama_supplier',
+                'supplier.alamat',
+                'supplier.no_whatsapp',
+                'supplier.id_resto',
+                'users.id as id_pegawai',
+                'users.name as nama_pegawai',
+                'produk.id as product_id',
+                'produk.nama_produk',
+                'produk.id_kategori_produk',
+                'produk.nomor_sku',
+                'produk.gambar',
+                'produk.harga_awal',
+                'produk.harga_jual',
+                'produk.diskon',
+                'produk.stok',
+                'produk.status_diskon',
+                'produk.status_produk',
+                'kategori_produk.kategori_produk'
+            )
+            ->get();
+
+        return ApiFormatter::createApi(200, 'Data mutasi stok berhasil ditemukan.', $data_stok);
+    }
+
+    public function laporan_pendapatan_group(Request $request)
+    {
+        $tanggal_awal = date('Y-m-d H:i:s', strtotime($request->input('tanggal-awal')));
+        $tanggal_akhir = date('Y-m-d H:i:s', strtotime($request->input('tanggal-akhir')));
+
+        // Ambil group outlet pengguna
+        $id_group_outlet = GroupOutlet::where('id_multi_outlet', auth()->user()->id)
+            ->pluck('id')
+            ->first();
+
+        if (!$id_group_outlet) {
+            return ApiFormatter::createApi(404, 'Group outlet tidak ditemukan.');
+        }
+
+        // Ambil daftar resto terkait grup outlet
+        $id_resto_list = OutletResto::where('id_group_outlet', $id_group_outlet)
+            ->pluck('id_resto');
+
+        if ($id_resto_list->isEmpty()) {
+            return ApiFormatter::createApi(404, 'Tidak ada restoran terkait dengan grup outlet ini.');
+        }
+
+        // Jika parameter id_resto diberikan, filter untuk toko tertentu
+        $id_resto = $request->input('id_resto');
+        if ($id_resto && !$id_resto_list->contains($id_resto)) {
+            return ApiFormatter::createApi(404, 'Restoran tidak ditemukan dalam grup outlet.');
+        }
+
+        // Ambil data order dari restoran yang sesuai
+        $orderQuery = Order::whereBetween('created_at', [$tanggal_awal, $tanggal_akhir])
+            ->whereIn('id_resto', $id_resto_list)
+            ->where('status_order', 'closed');
+
+        if ($id_resto) {
+            $orderQuery->where('id_resto', $id_resto);
+        }
+
+        $order = $orderQuery->get();
+
+        // Variabel inisialisasi
+        $penjualan_kotor = 0;
+        $total_diskon = 0;
+        $penjualan_bersih = 0;
+        $laba_kotor = 0;
+        $hpp = 0;
+        $pajak = 0;
+        $service_charge = 0;
+
+        foreach ($order as $value) {
+            $laba_kotor += $value->nilai_laba;
+            $total_diskon += $value->diskon;
+            $penjualan_bersih += $value->nilai_transaksi;
+            $penjualan_kotor += $value->nilai_transaksi + $value->diskon;
+
+            $pajak += $value->pajak;
+            $service_charge += $value->service_charge;
+
+            foreach ($value->order_detail as $order_detail) {
+                $hpp += optional($order_detail->produk)->harga_awal * $order_detail->jumlah_beli;
+            }
+        }
+
+        $laba_bersih = $penjualan_bersih - $hpp;
+
+        return ApiFormatter::createApi(200, 'Success', [
+            'penjualan_bersih' => $penjualan_bersih,
+            'hpp' => $hpp,
+            'laba_bersih' => $laba_bersih,
+            'penjualan_kotor' => $penjualan_kotor,
+            'total_diskon' => $total_diskon,
+            'laba_kotor' => $laba_kotor,
+            'pajak' => $pajak,
+            'service_charge' => $service_charge,
+        ]);
+    }
+
 }
