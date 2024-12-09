@@ -411,22 +411,20 @@ class LaporanController extends Controller
             return ApiFormatter::createApi(404, 'Tidak ada restoran terkait dengan grup outlet ini.');
         }
 
-        // Jika parameter id_resto diberikan, filter untuk toko tertentu
+        // Validasi parameter id_resto
         $id_resto = $request->input('id_resto');
-        if ($id_resto && !$id_resto_list->contains($id_resto)) {
-            return ApiFormatter::createApi(404, 'Restoran tidak ditemukan dalam grup outlet.');
+        if ($id_resto) {
+            if (!$id_resto_list->contains($id_resto)) {
+                return ApiFormatter::createApi(404, 'Restoran tidak ditemukan dalam grup outlet.');
+            }
+            $id_resto_list = [$id_resto]; // Restrict to specific resto
         }
 
         // Ambil data order dari restoran yang sesuai
-        $orderQuery = Order::whereBetween('created_at', [$tanggal_awal, $tanggal_akhir])
+        $orders = Order::whereBetween('created_at', [$tanggal_awal, $tanggal_akhir])
             ->whereIn('id_resto', $id_resto_list)
-            ->where('status_order', 'closed');
-
-        if ($id_resto) {
-            $orderQuery->where('id_resto', $id_resto);
-        }
-
-        $order = $orderQuery->get();
+            ->where('status_order', 'closed')
+            ->get();
 
         // Variabel inisialisasi
         $penjualan_kotor = 0;
@@ -437,16 +435,16 @@ class LaporanController extends Controller
         $pajak = 0;
         $service_charge = 0;
 
-        foreach ($order as $value) {
-            $laba_kotor += $value->nilai_laba;
-            $total_diskon += $value->diskon;
-            $penjualan_bersih += $value->nilai_transaksi;
-            $penjualan_kotor += $value->nilai_transaksi + $value->diskon;
+        foreach ($orders as $order) {
+            $laba_kotor += $order->nilai_laba;
+            $total_diskon += $order->diskon;
+            $penjualan_bersih += $order->nilai_transaksi;
+            $penjualan_kotor += $order->nilai_transaksi + $order->diskon;
 
-            $pajak += $value->pajak;
-            $service_charge += $value->service_charge;
+            $pajak += $order->pajak;
+            $service_charge += $order->service_charge;
 
-            foreach ($value->order_detail as $order_detail) {
+            foreach ($order->order_detail as $order_detail) {
                 $hpp += optional($order_detail->produk)->harga_awal * $order_detail->jumlah_beli;
             }
         }
