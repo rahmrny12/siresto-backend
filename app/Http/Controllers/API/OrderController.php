@@ -109,7 +109,7 @@ class OrderController extends Controller
                 'status_order' => 'in_progress',
                 'status_bayar' => 'already_paid',
                 'uuid' => Str::uuid(),
-                'id_staff' => $user->id_level == 3 ? $user->id : null
+                'id_staff' => $user->id
             ]);
 
             $id_order = $order->id;
